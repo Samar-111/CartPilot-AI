@@ -1,0 +1,19 @@
+{
+  "name": "cartpilot-ai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace=apps/api run dev",
+    "dev:web": "npm --workspace=apps/web run dev",
+    "build:shared": "npm --workspace=packages/shared run build",
+    "build:api": "npm --workspace=apps/api run build",
+    "build:web": "npm --workspace=apps/web run build",
+    "build": "npm run build:shared && npm run build:api && npm run build:web",
+    "seed": "npm --workspace=apps/api run seed",
+    "test": "npm --workspace=apps/api run test"
+  }
+}
