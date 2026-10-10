@@ -55,9 +55,26 @@ export const sampleProducts = [
 ];
 
 export const storeLocations = [
-  { storeName: "Bengaluru Central DarkStore", pincode: "560001", multiplier: 1.0 },
-  { storeName: "Mumbai West Hub", pincode: "400050", multiplier: 1.05 },
-  { storeName: "Delhi North SuperStore", pincode: "110001", multiplier: 0.98 }
+  { cityName: "Bengaluru", state: "Karnataka", storeName: "Bengaluru Central DarkStore", pincode: "560001", multiplier: 1.0 },
+  { cityName: "Mumbai", state: "Maharashtra", storeName: "Mumbai West Hub (Bandra)", pincode: "400050", multiplier: 1.06 },
+  { cityName: "Delhi NCR", state: "Delhi", storeName: "Delhi Connaught Place Hub", pincode: "110001", multiplier: 0.98 },
+  { cityName: "Hyderabad", state: "Telangana", storeName: "Hyderabad Hitec City Hub", pincode: "500081", multiplier: 0.96 },
+  { cityName: "Chennai", state: "Tamil Nadu", storeName: "Chennai T Nagar Store", pincode: "600017", multiplier: 0.97 },
+  { cityName: "Kolkata", state: "West Bengal", storeName: "Kolkata Park Street Hub", pincode: "700016", multiplier: 0.92 },
+  { cityName: "Pune", state: "Maharashtra", storeName: "Pune Shivaji Nagar Mart", pincode: "411005", multiplier: 1.01 },
+  { cityName: "Ahmedabad", state: "Gujarat", storeName: "Ahmedabad SG Highway Store", pincode: "380015", multiplier: 0.94 },
+  { cityName: "Jaipur", state: "Rajasthan", storeName: "Jaipur Malviya Nagar Hub", pincode: "302017", multiplier: 0.93 },
+  { cityName: "Lucknow", state: "Uttar Pradesh", storeName: "Lucknow Hazratganj Store", pincode: "226001", multiplier: 0.91 },
+  { cityName: "Chandigarh", state: "Punjab/Haryana", storeName: "Chandigarh Sector 17 Hub", pincode: "160017", multiplier: 0.99 },
+  { cityName: "Indore", state: "Madhya Pradesh", storeName: "Indore Vijay Nagar Mart", pincode: "452010", multiplier: 0.90 },
+  { cityName: "Kochi", state: "Kerala", storeName: "Kochi Marine Drive Hub", pincode: "682031", multiplier: 1.02 },
+  { cityName: "Bhopal", state: "Madhya Pradesh", storeName: "Bhopal MP Nagar Store", pincode: "462011", multiplier: 0.89 },
+  { cityName: "Patna", state: "Bihar", storeName: "Patna Fraser Road Hub", pincode: "800001", multiplier: 0.88 },
+  { cityName: "Surat", state: "Gujarat", storeName: "Surat Adajan Mart", pincode: "395009", multiplier: 0.93 },
+  { cityName: "Nagpur", state: "Maharashtra", storeName: "Nagpur Sitabuldi Hub", pincode: "440012", multiplier: 0.92 },
+  { cityName: "Coimbatore", state: "Tamil Nadu", storeName: "Coimbatore RS Puram Store", pincode: "641002", multiplier: 0.95 },
+  { cityName: "Visakhapatnam", state: "Andhra Pradesh", storeName: "Vizag Beach Road Hub", pincode: "530002", multiplier: 0.94 },
+  { cityName: "Guwahati", state: "Assam", storeName: "Guwahati GS Road Hub", pincode: "781005", multiplier: 1.04 }
 ];
 
 export async function seed(): Promise<void> {
@@ -74,13 +91,15 @@ export async function seed(): Promise<void> {
         pricePaise: Math.round(base.pricePaise * store.multiplier),
         storeName: store.storeName,
         pincode: store.pincode,
+        cityName: store.cityName,
+        state: store.state,
         lastPriceSyncAt: new Date()
       });
     }
   }
 
   const inserted = await ProductModel.insertMany(allStoreProducts);
-  console.log(`Seeded ${inserted.length} products across 3 cities/stores successfully.`);
+  console.log(`Seeded ${inserted.length} products across ${storeLocations.length} Indian cities/stores successfully.`);
 
   const testUser = await UserModel.findOneAndUpdate(
     { email: "user@cartpilot.ai" },

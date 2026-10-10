@@ -15,7 +15,7 @@ productsRouter.get("/", async (req: Request, res: Response) => {
       isHealthy: isHealthy !== undefined ? isHealthy === "true" : undefined,
       pincode: pincode ? String(pincode) : undefined,
       storeName: storeName ? String(storeName) : undefined,
-      limit: limit ? parseInt(String(limit), 10) : 50
+      limit: limit ? parseInt(String(limit), 10) : 100
     });
 
     res.json({
@@ -32,11 +32,40 @@ productsRouter.get("/", async (req: Request, res: Response) => {
         image: p.image,
         storeName: p.storeName || "Bengaluru Central DarkStore",
         pincode: p.pincode || "560001",
+        cityName: p.cityName || "Bengaluru",
+        state: p.state || "Karnataka",
         lastPriceSyncAt: p.lastPriceSyncAt
       }))
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to fetch products" });
+  }
+});
+
+productsRouter.get("/stores", async (_req: Request, res: Response) => {
+  try {
+    const stores = await ProductModel.aggregate([
+      {
+        $group: {
+          _id: { pincode: "$pincode", storeName: "$storeName", cityName: "$cityName", state: "$state" },
+          itemCount: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          pincode: "$_id.pincode",
+          storeName: "$_id.storeName",
+          cityName: "$_id.cityName",
+          state: "$_id.state",
+          itemCount: 1
+        }
+      },
+      { $sort: { cityName: 1, storeName: 1 } }
+    ]);
+    res.json({ stores });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || "Failed to fetch stores" });
   }
 });
 
@@ -51,16 +80,19 @@ productsRouter.post("/sync", async (req: Request, res: Response) => {
     let updatedCount = 0;
     for (const item of items) {
       if (!item.name || !item.pricePaise) continue;
+      const targetPincode = pincode || item.pincode || "560001";
+      const targetStoreName = storeName || item.storeName || "Bengaluru Central DarkStore";
 
       await ProductModel.findOneAndUpdate(
-        { name: item.name },
+        { name: item.name, pincode: targetPincode },
         {
+          name: item.name,
           pricePaise: item.pricePaise,
           stock: item.stock !== undefined ? item.stock : 50,
           unit: item.unit || "unit",
           category: item.category || "staples",
-          storeName: storeName || item.storeName || "Bengaluru Central DarkStore",
-          pincode: pincode || item.pincode || "560001",
+          storeName: targetStoreName,
+          pincode: targetPincode,
           lastPriceSyncAt: new Date()
         },
         { upsert: true, new: true }

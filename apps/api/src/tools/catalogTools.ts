@@ -35,7 +35,7 @@ export async function searchProducts(input: ProductSearchInput): Promise<IProduc
     filter.$or = [{ name: regex }, { tags: regex }];
   }
 
-  const limit = Math.min(parsed.limit || 20, 50);
+  const limit = Math.min(parsed.limit || 60, 200);
 
   return ProductModel.find(filter)
     .sort({ isHealthy: -1, pricePaise: 1 })

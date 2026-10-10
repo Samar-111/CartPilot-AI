@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
-import { Search, Heart, Sparkles, ShoppingBag, Check, ArrowUpDown, Filter, AlertCircle } from "lucide-react";
-import { paiseToRupees } from "@cartpilot/shared";
+import { Search, Heart, Sparkles, ShoppingBag, Check, ArrowUpDown, Filter, AlertCircle, MapPin, Building2 } from "lucide-react";
+import { paiseToRupees, INDIAN_CITIES, CityStore } from "@cartpilot/shared";
 
 interface ProductItem {
   id: string;
@@ -16,6 +16,8 @@ interface ProductItem {
   isHealthy: boolean;
   storeName?: string;
   pincode?: string;
+  cityName?: string;
+  state?: string;
   lastPriceSyncAt?: string;
 }
 
@@ -25,16 +27,10 @@ export default function ProductsPage() {
   const [category, setCategory] = useState("");
   const [onlyHealthy, setOnlyHealthy] = useState(false);
   const [sortBy, setSortBy] = useState<"featured" | "price-asc" | "price-desc">("featured");
-  const [selectedCity, setSelectedCity] = useState("560001");
+  const [selectedCityPincode, setSelectedCityPincode] = useState("560001");
   const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
-
-  const stores = [
-    { city: "Bengaluru Central (560001)", pincode: "560001", store: "Bengaluru Central DarkStore" },
-    { city: "Mumbai Bandra (400050)", pincode: "400050", store: "Mumbai West Hub" },
-    { city: "Delhi NCR (110001)", pincode: "110001", store: "Delhi North SuperStore" }
-  ];
 
   const categories = [
     "fruits",
@@ -48,10 +44,11 @@ export default function ProductsPage() {
     "staples"
   ];
 
+  const currentCityStore = INDIAN_CITIES.find(c => c.pincode === selectedCityPincode) || INDIAN_CITIES[0];
+
   const handleLivePriceSync = async () => {
     setSyncing(true);
     try {
-      const activeStore = stores.find(s => s.pincode === selectedCity);
       const syncPayload = products.length > 0
         ? products.map(p => {
             const delta = Math.floor((Math.random() - 0.45) * 1000);
@@ -65,22 +62,22 @@ export default function ProductsPage() {
             };
           })
         : [
-            { name: "Organic Rolled Oats", pricePaise: 18000, category: "grains", unit: "1kg", stock: 50 },
-            { name: "Fresh Soya Paneer Tofu", pricePaise: 14000, category: "protein", unit: "400g", stock: 40 },
-            { name: "Greek Style Natural Yogurt", pricePaise: 22000, category: "dairy", unit: "800g", stock: 30 },
-            { name: "Farm Fresh Green Spinach", pricePaise: 6500, category: "vegetables", unit: "500g", stock: 60 }
+            { name: "Rolled Oats (Gluten Free)", pricePaise: 18000, category: "grains", unit: "500g", stock: 50 },
+            { name: "Organic Tofu Natural", pricePaise: 10500, category: "protein", unit: "200g", stock: 40 },
+            { name: "Greek Yogurt Natural (Unsweetened)", pricePaise: 9500, category: "dairy", unit: "400g", stock: 35 },
+            { name: "Fresh Spinach (Palak)", pricePaise: 4000, category: "vegetables", unit: "250g", stock: 60 }
           ];
 
       await apiFetch("/products/sync", {
         method: "POST",
         body: JSON.stringify({
           items: syncPayload,
-          storeName: activeStore?.store,
-          pincode: activeStore?.pincode
+          storeName: currentCityStore.storeName,
+          pincode: currentCityStore.pincode
         })
       });
 
-      const res = await apiFetch<{ products: ProductItem[] }>(`/products?pincode=${selectedCity}`);
+      const res = await apiFetch<{ products: ProductItem[] }>(`/products?pincode=${selectedCityPincode}&limit=100`);
       setProducts(res.products || []);
     } catch (err: any) {
       alert(`Sync failed: ${err.message}`);
@@ -97,7 +94,8 @@ export default function ProductsPage() {
         if (search) queryParams.set("query", search);
         if (category) queryParams.set("category", category);
         if (onlyHealthy) queryParams.set("isHealthy", "true");
-        if (selectedCity) queryParams.set("pincode", selectedCity);
+        if (selectedCityPincode) queryParams.set("pincode", selectedCityPincode);
+        queryParams.set("limit", "100");
 
         const res = await apiFetch<{ products: ProductItem[] }>(`/products?${queryParams.toString()}`);
         let items = res.products || [];
@@ -116,7 +114,7 @@ export default function ProductsPage() {
       }
     }
     load();
-  }, [search, category, onlyHealthy, sortBy]);
+  }, [search, category, onlyHealthy, sortBy, selectedCityPincode]);
 
   const addToCart = async (productId: string) => {
     try {
@@ -139,13 +137,13 @@ export default function ProductsPage() {
         <div>
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-1">
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Ground-Truth Catalog</span>
+            <span>Pan-India Live Catalog</span>
           </div>
           <h1 className="font-display text-3xl font-extrabold text-slate-900 tracking-tight">
-            Discover Verified Products
+            Discover Verified Products Across India
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Browse our catalog of items with real-time stock levels and verified server-side prices.
+            Choose your city to view real-time regional prices, warehouse stock, and local fulfillment center inventory.
           </p>
         </div>
 
@@ -154,7 +152,7 @@ export default function ProductsPage() {
             <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
             <input
               type="text"
-              placeholder="Search products or tags..."
+              placeholder="Search products, brands, tags..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
@@ -162,17 +160,20 @@ export default function ProductsPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="py-2 px-3 text-xs rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
-            >
-              {stores.map((s) => (
-                <option key={s.pincode} value={s.pincode}>
-                  {s.city}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-sm">
+              <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <select
+                value={selectedCityPincode}
+                onChange={(e) => setSelectedCityPincode(e.target.value)}
+                className="text-xs font-semibold text-slate-800 bg-transparent focus:outline-none cursor-pointer pr-1"
+              >
+                {INDIAN_CITIES.map((c) => (
+                  <option key={c.pincode} value={c.pincode}>
+                    {c.cityName} ({c.pincode}) — {c.state}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <button
               onClick={handleLivePriceSync}
@@ -206,6 +207,20 @@ export default function ProductsPage() {
               <span>Healthy Only</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5 text-emerald-900">
+          <Building2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+          <span>
+            Active Fulfillment Center: <strong>{currentCityStore.storeName}</strong> ({currentCityStore.cityName}, PIN: {currentCityStore.pincode})
+          </span>
+        </div>
+        <div className="flex items-center gap-3 text-slate-600">
+          <span className="font-semibold text-emerald-800">{products.length} Items In Stock</span>
+          <span>•</span>
+          <span>Delivery in 15–30 mins</span>
         </div>
       </div>
 
@@ -249,20 +264,28 @@ export default function ProductsPage() {
       ) : products.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200/80 p-16 text-center max-w-md mx-auto space-y-3">
           <AlertCircle className="w-8 h-8 text-slate-400 mx-auto" />
-          <h3 className="font-semibold text-slate-800 text-base">No Products Found</h3>
+          <h3 className="font-semibold text-slate-800 text-base">No Products Found for {currentCityStore.cityName}</h3>
           <p className="text-xs text-slate-500">
-            No items in our verified MongoDB catalog match your search or filter options.
+            No items in this fulfillment center match your filter. Click &quot;Sync Live Prices&quot; above to instantly initialize catalog stock.
           </p>
-          <button
-            onClick={() => {
-              setSearch("");
-              setCategory("");
-              setOnlyHealthy(false);
-            }}
-            className="text-xs text-emerald-600 font-semibold hover:underline"
-          >
-            Clear Filters
-          </button>
+          <div className="pt-2 flex justify-center gap-2">
+            <button
+              onClick={handleLivePriceSync}
+              className="text-xs bg-emerald-600 text-white font-semibold px-3 py-1.5 rounded-lg hover:bg-emerald-700"
+            >
+              Seed & Sync Live Inventory
+            </button>
+            <button
+              onClick={() => {
+                setSearch("");
+                setCategory("");
+                setOnlyHealthy(false);
+              }}
+              className="text-xs text-emerald-600 font-semibold hover:underline px-2 py-1.5"
+            >
+              Clear Filters
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -293,7 +316,7 @@ export default function ProductsPage() {
                     <span>{p.unit}</span>
                     <span>•</span>
                     <span className="text-emerald-700 font-medium truncate max-w-[140px]">
-                      {p.storeName || "Central DarkStore"}
+                      {p.storeName || currentCityStore.storeName}
                     </span>
                   </div>
 

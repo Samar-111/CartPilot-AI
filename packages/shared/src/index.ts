@@ -46,9 +46,41 @@ export const ProductSchema = z.object({
   isActive: z.boolean().default(true),
   image: z.string().optional(),
   storeName: z.string().default("Bengaluru Central DarkStore"),
-  pincode: z.string().default("560001")
+  pincode: z.string().default("560001"),
+  cityName: z.string().optional(),
+  state: z.string().optional()
 });
 export type Product = z.infer<typeof ProductSchema>;
+
+export interface CityStore {
+  cityName: string;
+  state: string;
+  pincode: string;
+  storeName: string;
+}
+
+export const INDIAN_CITIES: CityStore[] = [
+  { cityName: "Bengaluru", state: "Karnataka", pincode: "560001", storeName: "Bengaluru Central DarkStore" },
+  { cityName: "Mumbai", state: "Maharashtra", pincode: "400050", storeName: "Mumbai West Hub (Bandra)" },
+  { cityName: "Delhi NCR", state: "Delhi", pincode: "110001", storeName: "Delhi Connaught Place Hub" },
+  { cityName: "Hyderabad", state: "Telangana", pincode: "500081", storeName: "Hyderabad Hitec City Hub" },
+  { cityName: "Chennai", state: "Tamil Nadu", pincode: "600017", storeName: "Chennai T Nagar Store" },
+  { cityName: "Kolkata", state: "West Bengal", pincode: "700016", storeName: "Kolkata Park Street Hub" },
+  { cityName: "Pune", state: "Maharashtra", pincode: "411005", storeName: "Pune Shivaji Nagar Mart" },
+  { cityName: "Ahmedabad", state: "Gujarat", pincode: "380015", storeName: "Ahmedabad SG Highway Store" },
+  { cityName: "Jaipur", state: "Rajasthan", pincode: "302017", storeName: "Jaipur Malviya Nagar Hub" },
+  { cityName: "Lucknow", state: "Uttar Pradesh", pincode: "226001", storeName: "Lucknow Hazratganj Store" },
+  { cityName: "Chandigarh", state: "Punjab/Haryana", pincode: "160017", storeName: "Chandigarh Sector 17 Hub" },
+  { cityName: "Indore", state: "Madhya Pradesh", pincode: "452010", storeName: "Indore Vijay Nagar Mart" },
+  { cityName: "Kochi", state: "Kerala", pincode: "682031", storeName: "Kochi Marine Drive Hub" },
+  { cityName: "Bhopal", state: "Madhya Pradesh", pincode: "462011", storeName: "Bhopal MP Nagar Store" },
+  { cityName: "Patna", state: "Bihar", pincode: "800001", storeName: "Patna Fraser Road Hub" },
+  { cityName: "Surat", state: "Gujarat", pincode: "395009", storeName: "Surat Adajan Mart" },
+  { cityName: "Nagpur", state: "Maharashtra", pincode: "440012", storeName: "Nagpur Sitabuldi Hub" },
+  { cityName: "Coimbatore", state: "Tamil Nadu", pincode: "641002", storeName: "Coimbatore RS Puram Store" },
+  { cityName: "Visakhapatnam", state: "Andhra Pradesh", pincode: "530002", storeName: "Vizag Beach Road Hub" },
+  { cityName: "Guwahati", state: "Assam", pincode: "781005", storeName: "Guwahati GS Road Hub" }
+];
 
 export const CartItemSchema = z.object({
   productId: z.string(),
@@ -184,7 +216,7 @@ export const ProductSearchInputSchema = z.object({
   isHealthy: z.boolean().optional(),
   pincode: z.string().optional(),
   storeName: z.string().optional(),
-  limit: z.number().int().min(1).max(50).default(20)
+  limit: z.number().int().min(1).max(200).default(60)
 });
 export type ProductSearchInput = z.infer<typeof ProductSearchInputSchema>;
 

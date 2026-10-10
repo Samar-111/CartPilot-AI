@@ -13,6 +13,8 @@ export interface IProductDocument extends Document {
   image?: string;
   storeName?: string;
   pincode?: string;
+  cityName?: string;
+  state?: string;
   lastPriceSyncAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -31,6 +33,8 @@ const ProductSchema = new Schema<IProductDocument>(
     image: { type: String },
     storeName: { type: String, default: "Bengaluru Central DarkStore", index: true },
     pincode: { type: String, default: "560001", index: true },
+    cityName: { type: String, default: "Bengaluru", index: true },
+    state: { type: String, default: "Karnataka" },
     lastPriceSyncAt: { type: Date, default: Date.now }
   },
   { timestamps: true }
