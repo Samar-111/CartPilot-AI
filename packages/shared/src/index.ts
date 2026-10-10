@@ -184,13 +184,28 @@ export const ProductSearchInputSchema = z.object({
 });
 export type ProductSearchInput = z.infer<typeof ProductSearchInputSchema>;
 
+export const DeliveryAddressSchema = z.object({
+  fullName: z.string().min(2),
+  phone: z.string().min(10),
+  street: z.string().min(5),
+  city: z.string().min(2),
+  state: z.string().min(2),
+  pincode: z.string().min(6)
+});
+export type DeliveryAddress = z.infer<typeof DeliveryAddressSchema>;
+
 export const OrderSchema = z.object({
   id: z.string(),
   userId: z.string(),
   sessionId: z.string().optional(),
   items: z.array(CartItemSchema),
   totalPaise: z.number().int().positive(),
-  status: z.enum(["pending_confirmation", "confirmed", "dispatched", "delivered"]).default("confirmed"),
+  status: z.enum(["pending_payment", "confirmed", "dispatched", "delivered", "failed"]).default("confirmed"),
+  paymentMethod: z.enum(["razorpay", "simulated", "cod"]).default("razorpay"),
+  paymentStatus: z.enum(["pending", "paid", "failed"]).default("pending"),
+  razorpayOrderId: z.string().optional(),
+  razorpayPaymentId: z.string().optional(),
+  deliveryAddress: DeliveryAddressSchema.optional(),
   createdAt: z.string().or(z.date())
 });
 export type Order = z.infer<typeof OrderSchema>;
