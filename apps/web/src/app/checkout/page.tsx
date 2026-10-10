@@ -126,20 +126,31 @@ export default function CheckoutPage() {
         }
       };
 
-      if (typeof window !== "undefined" && window.Razorpay) {
+      if (typeof window !== "undefined" && window.Razorpay && !orderRes.razorpayOrderId.startsWith("rzp_sim_")) {
         const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", function (response: any) {
+          setErrorMsg(`Payment Failed: ${response.error.description || "Transaction declined"}`);
+          setProcessing(false);
+        });
         rzp.open();
       } else {
-        await apiFetch("/checkout/verify-payment", {
-          method: "POST",
-          body: JSON.stringify({
-            orderId: orderRes.orderId,
-            razorpayOrderId: orderRes.razorpayOrderId,
-            razorpayPaymentId: `pay_test_${Date.now()}`,
-            razorpaySignature: "simulated_valid_signature"
-          })
-        });
-        router.push(`/orders?successId=${orderRes.orderId}`);
+        setTimeout(async () => {
+          try {
+            await apiFetch("/checkout/verify-payment", {
+              method: "POST",
+              body: JSON.stringify({
+                orderId: orderRes.orderId,
+                razorpayOrderId: orderRes.razorpayOrderId,
+                razorpayPaymentId: `pay_test_${Date.now()}`,
+                razorpaySignature: "simulated_valid_signature"
+              })
+            });
+            router.push(`/orders?successId=${orderRes.orderId}`);
+          } catch (verifyErr: any) {
+            setErrorMsg(`Payment verification failed: ${verifyErr.message}`);
+            setProcessing(false);
+          }
+        }, 800);
       }
     } catch (err: any) {
       setErrorMsg(err.message || "Checkout failed");
@@ -292,23 +303,60 @@ export default function CheckoutPage() {
             </span>
           </div>
 
-          <button
-            type="submit"
-            disabled={processing}
-            className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-semibold py-3.5 px-4 rounded-xl text-sm transition-all shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/30"
-          >
-            {processing ? (
-              <span className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span>Authorizing Razorpay Gateway...</span>
-              </span>
-            ) : (
-              <>
-                <Lock className="w-4 h-4" />
-                <span>Pay {paiseToRupees(cart?.totalPaise || 0)} via Razorpay</span>
-              </>
-            )}
-          </button>
+          <div className="space-y-2.5">
+            <button
+              type="submit"
+              disabled={processing}
+              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-semibold py-3.5 px-4 rounded-xl text-sm transition-all shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/30"
+            >
+              {processing ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <span>Verifying Transaction...</span>
+                </span>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  <span>Pay {paiseToRupees(cart?.totalPaise || 0)} (Razorpay Test Gateway)</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              disabled={processing}
+              onClick={async () => {
+                setProcessing(true);
+                setErrorMsg(null);
+                try {
+                  const orderRes = await apiFetch<{
+                    orderId: string;
+                    razorpayOrderId: string;
+                  }>("/checkout/create-order", {
+                    method: "POST",
+                    body: JSON.stringify({ deliveryAddress: address })
+                  });
+
+                  await apiFetch("/checkout/verify-payment", {
+                    method: "POST",
+                    body: JSON.stringify({
+                      orderId: orderRes.orderId,
+                      razorpayOrderId: orderRes.razorpayOrderId,
+                      razorpayPaymentId: `pay_sim_${Date.now()}`,
+                      razorpaySignature: "simulated_valid_signature"
+                    })
+                  });
+                  router.push(`/orders?successId=${orderRes.orderId}`);
+                } catch (simErr: any) {
+                  setErrorMsg(simErr.message);
+                  setProcessing(false);
+                }
+              }}
+              className="w-full flex items-center justify-center gap-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-2.5 px-4 rounded-xl text-xs transition-colors"
+            >
+              <span>Instant Test Payment (Direct Signature Verification)</span>
+            </button>
+          </div>
 
           <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 text-center">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
