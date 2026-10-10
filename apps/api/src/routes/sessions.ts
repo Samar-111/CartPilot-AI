@@ -19,10 +19,22 @@ sessionsRouter.post("/", async (req: AuthenticatedRequest, res: Response) => {
   try {
     const input = CreateShoppingSessionInputSchema.parse(req.body);
 
+    let effectiveBudgetPaise = input.budgetPaise;
+    const explicitBudgetMatch = input.request.match(
+      /(?:under|below|within|upto|cap|budget(?:\s*of)?|total(?:\s*under)?)\s*(?:₹|rs\.?|inr)?\s*([0-9]+(?:,[0-9]+)*)/i
+    ) || input.request.match(/(?:₹|rs\.?|inr)\s*([0-9]+(?:,[0-9]+)*)/i);
+
+    if (explicitBudgetMatch && explicitBudgetMatch[1]) {
+      const parsedNum = parseInt(explicitBudgetMatch[1].replace(/,/g, ""), 10);
+      if (!isNaN(parsedNum) && parsedNum >= 100 && parsedNum <= 100000) {
+        effectiveBudgetPaise = parsedNum * 100;
+      }
+    }
+
     const session = await ShoppingSessionModel.create({
       userId: new mongoose.Types.ObjectId(req.userId!),
       request: input.request,
-      budgetPaise: input.budgetPaise,
+      budgetPaise: effectiveBudgetPaise,
       preferences: input.preferences || [],
       peopleCount: input.peopleCount,
       durationDays: input.durationDays,
@@ -45,7 +57,7 @@ sessionsRouter.post("/", async (req: AuthenticatedRequest, res: Response) => {
       userId: req.userId!,
       sessionId: session._id.toString(),
       userRequest: input.request,
-      budgetPaise: input.budgetPaise,
+      budgetPaise: effectiveBudgetPaise,
       preferences: input.preferences || [],
       peopleCount: input.peopleCount,
       durationDays: input.durationDays,

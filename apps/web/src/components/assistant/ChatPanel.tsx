@@ -17,6 +17,68 @@ interface ChatPanelProps {
   isLoading: boolean;
 }
 
+export function parsePromptConstraints(text: string) {
+  const result: {
+    budget?: number;
+    people?: number;
+    days?: number;
+    preferences: string[];
+  } = { preferences: [] };
+
+  const budgetRegex = /(?:under|below|within|upto|cap|budget(?:\s*of)?|max)?\s*(?:₹|rs\.?|inr)?\s*([0-9]+(?:,[0-9]+)*)(?:\s*(?:rs|rupees|inr|₹|\/-))?/i;
+  const explicitBudgetMatch = text.match(
+    /(?:under|below|within|upto|cap|budget(?:\s*of)?|total(?:\s*under)?)\s*(?:₹|rs\.?|inr)?\s*([0-9]+(?:,[0-9]+)*)/i
+  ) || text.match(/(?:₹|rs\.?|inr)\s*([0-9]+(?:,[0-9]+)*)/i);
+
+  if (explicitBudgetMatch && explicitBudgetMatch[1]) {
+    const rawNum = explicitBudgetMatch[1].replace(/,/g, "");
+    const parsedNum = parseInt(rawNum, 10);
+    if (!isNaN(parsedNum) && parsedNum >= 100 && parsedNum <= 100000) {
+      result.budget = parsedNum;
+    }
+  }
+
+  const peopleMatch = text.match(/([0-9]+)\s*(?:people|persons|members|adults|family(?:\s*of)?\s*([0-9]+))/i) ||
+                      text.match(/(?:for)\s*([0-9]+)\s*(?:people|persons|members)?/i);
+  if (peopleMatch) {
+    const num = parseInt(peopleMatch[1] || peopleMatch[2], 10);
+    if (!isNaN(num) && num >= 1 && num <= 20) {
+      result.people = num;
+    }
+  } else if (/two\s*(?:people|persons)?/i.test(text)) {
+    result.people = 2;
+  } else if (/three\s*(?:people|persons)?/i.test(text)) {
+    result.people = 3;
+  } else if (/four\s*(?:people|persons)?/i.test(text)) {
+    result.people = 4;
+  } else if (/one\s*(?:person)?/i.test(text)) {
+    result.people = 1;
+  }
+
+  const daysMatch = text.match(/([0-9]+)\s*(?:days)/i);
+  if (daysMatch) {
+    const num = parseInt(daysMatch[1], 10);
+    if (!isNaN(num) && num >= 1 && num <= 30) {
+      result.days = num;
+    }
+  } else if (/one\s*week|1\s*week|weekly/i.test(text)) {
+    result.days = 7;
+  } else if (/two\s*weeks|2\s*weeks/i.test(text)) {
+    result.days = 14;
+  } else if (/month|monthly/i.test(text)) {
+    result.days = 30;
+  }
+
+  const lower = text.toLowerCase();
+  if (lower.includes("healthy") || lower.includes("nutritious")) result.preferences.push("healthy");
+  if (lower.includes("vegetarian") || lower.includes("veg")) result.preferences.push("vegetarian");
+  if (lower.includes("vegan") || lower.includes("plant-based")) result.preferences.push("vegan");
+  if (lower.includes("protein") || lower.includes("high-protein")) result.preferences.push("high-protein");
+  if (lower.includes("gluten-free") || lower.includes("gluten free")) result.preferences.push("gluten-free");
+
+  return result;
+}
+
 export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
   const [request, setRequest] = useState(
     "I need groceries for one week for two people. Keep the total under ₹2,000, prioritize healthy options, and add everything to my cart."
@@ -26,6 +88,23 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
   const [durationDays, setDurationDays] = useState(7);
   const [preferences, setPreferences] = useState<string[]>(["healthy", "vegetarian"]);
   const [selectedPincode, setSelectedPincode] = useState("560001");
+
+  const handleRequestChange = (text: string) => {
+    setRequest(text);
+    const extracted = parsePromptConstraints(text);
+    if (extracted.budget !== undefined) {
+      setBudgetRupees(extracted.budget);
+    }
+    if (extracted.people !== undefined) {
+      setPeopleCount(extracted.people);
+    }
+    if (extracted.days !== undefined) {
+      setDurationDays(extracted.days);
+    }
+    if (extracted.preferences.length > 0) {
+      setPreferences((prev) => Array.from(new Set([...prev, ...extracted.preferences])));
+    }
+  };
 
   const samplePrompts = [
     {
@@ -55,12 +134,21 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!request.trim() || isLoading) return;
+
+    const extracted = parsePromptConstraints(request);
+    const finalBudgetRupees = extracted.budget !== undefined ? extracted.budget : budgetRupees;
+    const finalPeople = extracted.people !== undefined ? extracted.people : peopleCount;
+    const finalDays = extracted.days !== undefined ? extracted.days : durationDays;
+    const finalPrefs = extracted.preferences.length > 0
+      ? Array.from(new Set([...preferences, ...extracted.preferences]))
+      : preferences;
+
     onSubmit({
       request,
-      budgetPaise: budgetRupees * 100,
-      peopleCount,
-      durationDays,
-      preferences,
+      budgetPaise: finalBudgetRupees * 100,
+      peopleCount: finalPeople,
+      durationDays: finalDays,
+      preferences: finalPrefs,
       pincode: selectedPincode,
       cityName: selectedCityObj.cityName
     });
@@ -92,7 +180,7 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
           <div className="relative">
             <textarea
               value={request}
-              onChange={(e) => setRequest(e.target.value)}
+              onChange={(e) => handleRequestChange(e.target.value)}
               rows={3}
               className="w-full text-xs sm:text-sm rounded-xl border border-slate-200 p-3.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50 leading-relaxed"
               placeholder="E.g. I need groceries for one week for two people under ₹2,000..."
@@ -208,7 +296,7 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
               <button
                 type="button"
                 key={idx}
-                onClick={() => setRequest(p.text)}
+                onClick={() => handleRequestChange(p.text)}
                 className="w-full text-left p-2.5 rounded-xl hover:bg-emerald-50/50 border border-transparent hover:border-emerald-200/60 transition-colors group"
               >
                 <div className="text-xs font-semibold text-slate-800 group-hover:text-emerald-700">
