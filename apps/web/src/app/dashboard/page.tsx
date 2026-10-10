@@ -40,32 +40,55 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!currentSession?.id) return;
 
-    const token = localStorage.getItem("cartpilot_token");
-    const eventSource = new EventSource(
-      `http://localhost:5000/api/v1/shopping-sessions/${currentSession.id}/events?token=${token || ""}`
-    );
+    let isMounted = true;
+    const token = typeof window !== "undefined" ? localStorage.getItem("cartpilot_token") : null;
+    const sseUrl = `http://localhost:5000/api/v1/shopping-sessions/${currentSession.id}/events?token=${token || ""}`;
+    const eventSource = new EventSource(sseUrl);
+
+    const updateSession = async () => {
+      try {
+        const sess = await apiFetch<ShoppingSession>(`/shopping-sessions/${currentSession.id}`);
+        if (!isMounted) return;
+        setCurrentSession(sess);
+        if (
+          sess.status === "awaiting_approval" ||
+          sess.status === "approved" ||
+          sess.status === "failed" ||
+          sess.status === "rejected"
+        ) {
+          setIsLoading(false);
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
 
     eventSource.addEventListener("agent_event", (e) => {
       try {
         const ev: AgentEvent = JSON.parse(e.data);
+        if (!isMounted) return;
         setEvents((prev) => {
           if (prev.some((p) => p.id === ev.id)) return prev;
           return [...prev, ev];
         });
-
-        apiFetch<ShoppingSession>(`/shopping-sessions/${currentSession.id}`).then((sess) => {
-          setCurrentSession(sess);
-          if (sess.status === "awaiting_approval" || sess.status === "approved" || sess.status === "failed") {
-            setIsLoading(false);
-          }
-        });
+        updateSession();
       } catch (err) {
         console.error("SSE parse error:", err);
       }
     });
 
+    eventSource.onerror = () => {
+      // If SSE errors, polling below guarantees updates
+    };
+
+    const pollInterval = setInterval(() => {
+      updateSession();
+    }, 1200);
+
     return () => {
+      isMounted = false;
       eventSource.close();
+      clearInterval(pollInterval);
     };
   }, [currentSession?.id]);
 

@@ -9,7 +9,15 @@ export interface AuthenticatedRequest extends Request {
 
 export function authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  let token: string | undefined;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else if (req.query && typeof req.query.token === "string" && req.query.token) {
+    token = req.query.token;
+  }
+
+  if (!token) {
     const devUserId = req.headers["x-user-id"] as string;
     if (devUserId) {
       req.userId = devUserId;
@@ -19,8 +27,6 @@ export function authMiddleware(req: AuthenticatedRequest, res: Response, next: N
     res.status(401).json({ error: "Authentication required" });
     return;
   }
-
-  const token = authHeader.split(" ")[1];
   try {
     const payload = jwt.verify(token, config.jwtSecret) as { userId: string; email: string };
     req.userId = payload.userId;
