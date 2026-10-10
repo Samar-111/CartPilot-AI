@@ -47,7 +47,7 @@ Ensure the sum of budgetSharePaise across categories does not exceed ${state.bud
         { category: "protein", targetItemCount: 2, budgetSharePaise: Math.round(budget * 0.20), notes: "Paneer, tofu, lentils, or eggs" },
         { category: "dairy", targetItemCount: 1, budgetSharePaise: Math.round(budget * 0.15), notes: "Milk or yogurt" }
       ],
-      rationale: `Curated a 7-day ${isHealthy ? "wholesome & healthy " : ""}grocery plan for ${state.peopleCount || 2} persons within ₹${budget / 100}.`
+      rationale: `Curated a ${state.durationDays || 7}-day ${isHealthy ? "wholesome & healthy " : ""}grocery plan for ${state.peopleCount || 2} persons within ₹${budget / 100}.`
     };
   };
 

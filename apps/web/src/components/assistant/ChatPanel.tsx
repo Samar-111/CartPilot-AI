@@ -42,31 +42,43 @@ export function parsePromptConstraints(text: string) {
                       text.match(/(?:for)\s*([0-9]+)\s*(?:people|persons|members)?/i);
   if (peopleMatch) {
     const num = parseInt(peopleMatch[1] || peopleMatch[2], 10);
-    if (!isNaN(num) && num >= 1 && num <= 20) {
+    if (!isNaN(num) && num >= 1 && num <= 50) {
       result.people = num;
     }
-  } else if (/two\s*(?:people|persons)?/i.test(text)) {
-    result.people = 2;
-  } else if (/three\s*(?:people|persons)?/i.test(text)) {
-    result.people = 3;
-  } else if (/four\s*(?:people|persons)?/i.test(text)) {
-    result.people = 4;
-  } else if (/one\s*(?:person)?/i.test(text)) {
-    result.people = 1;
+  } else {
+    const wordNums: Record<string, number> = {
+      one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10
+    };
+    const wordMatch = text.match(/\b(one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:people|persons|members|family)/i);
+    if (wordMatch && wordNums[wordMatch[1].toLowerCase()]) {
+      result.people = wordNums[wordMatch[1].toLowerCase()];
+    }
   }
 
-  const daysMatch = text.match(/([0-9]+)\s*(?:days)/i);
-  if (daysMatch) {
-    const num = parseInt(daysMatch[1], 10);
-    if (!isNaN(num) && num >= 1 && num <= 30) {
-      result.days = num;
+  const weeksMatch = text.match(/([0-9]+)\s*(?:weeks?)/i);
+  if (weeksMatch) {
+    const w = parseInt(weeksMatch[1], 10);
+    if (!isNaN(w) && w >= 1 && w <= 8) {
+      result.days = w * 7;
     }
-  } else if (/one\s*week|1\s*week|weekly/i.test(text)) {
-    result.days = 7;
-  } else if (/two\s*weeks|2\s*weeks/i.test(text)) {
-    result.days = 14;
-  } else if (/month|monthly/i.test(text)) {
-    result.days = 30;
+  } else {
+    const wordWeeks: Record<string, number> = {
+      one: 7, two: 14, three: 21, four: 28
+    };
+    const wordWeekMatch = text.match(/\b(one|two|three|four)\s*(?:weeks?)/i);
+    if (wordWeekMatch && wordWeeks[wordWeekMatch[1].toLowerCase()]) {
+      result.days = wordWeeks[wordWeekMatch[1].toLowerCase()];
+    } else {
+      const daysMatch = text.match(/([0-9]+)\s*(?:days?)/i);
+      if (daysMatch) {
+        const num = parseInt(daysMatch[1], 10);
+        if (!isNaN(num) && num >= 1 && num <= 60) {
+          result.days = num;
+        }
+      } else if (/monthly|month/i.test(text)) {
+        result.days = 30;
+      }
+    }
   }
 
   const lower = text.toLowerCase();
@@ -231,9 +243,9 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
             <input
               type="number"
               value={peopleCount}
-              onChange={(e) => setPeopleCount(Number(e.target.value))}
+              onChange={(e) => setPeopleCount(Math.max(1, Number(e.target.value)))}
               min={1}
-              max={10}
+              max={25}
               className="w-full text-sm font-semibold rounded-lg border border-slate-200 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <span className="text-[10px] text-slate-400 mt-1 block">Household size</span>
@@ -246,9 +258,9 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
             <input
               type="number"
               value={durationDays}
-              onChange={(e) => setDurationDays(Number(e.target.value))}
+              onChange={(e) => setDurationDays(Math.max(1, Number(e.target.value)))}
               min={1}
-              max={30}
+              max={60}
               className="w-full text-sm font-semibold rounded-lg border border-slate-200 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <span className="text-[10px] text-slate-400 mt-1 block">Days of groceries</span>

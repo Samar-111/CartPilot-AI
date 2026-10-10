@@ -31,13 +31,50 @@ sessionsRouter.post("/", async (req: AuthenticatedRequest, res: Response) => {
       }
     }
 
+    let effectivePeople = input.peopleCount;
+    const peopleMatch = input.request.match(/([0-9]+)\s*(?:people|persons|members|adults|family(?:\s*of)?\s*([0-9]+))/i) ||
+                        input.request.match(/(?:for)\s*([0-9]+)\s*(?:people|persons|members)?/i);
+    if (peopleMatch) {
+      const num = parseInt(peopleMatch[1] || peopleMatch[2], 10);
+      if (!isNaN(num) && num >= 1) effectivePeople = num;
+    } else {
+      const wordNums: Record<string, number> = {
+        one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10
+      };
+      const wordMatch = input.request.match(/\b(one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:people|persons|members|family)/i);
+      if (wordMatch && wordNums[wordMatch[1].toLowerCase()]) {
+        effectivePeople = wordNums[wordMatch[1].toLowerCase()];
+      }
+    }
+
+    let effectiveDays = input.durationDays;
+    const weeksMatch = input.request.match(/([0-9]+)\s*(?:weeks?)/i);
+    if (weeksMatch) {
+      const w = parseInt(weeksMatch[1], 10);
+      if (!isNaN(w) && w >= 1) effectiveDays = w * 7;
+    } else {
+      const wordWeeks: Record<string, number> = { one: 7, two: 14, three: 21, four: 28 };
+      const wordWeekMatch = input.request.match(/\b(one|two|three|four)\s*(?:weeks?)/i);
+      if (wordWeekMatch && wordWeeks[wordWeekMatch[1].toLowerCase()]) {
+        effectiveDays = wordWeeks[wordWeekMatch[1].toLowerCase()];
+      } else {
+        const daysMatch = input.request.match(/([0-9]+)\s*(?:days?)/i);
+        if (daysMatch) {
+          const d = parseInt(daysMatch[1], 10);
+          if (!isNaN(d) && d >= 1) effectiveDays = d;
+        } else if (/monthly|month/i.test(input.request)) {
+          effectiveDays = 30;
+        }
+      }
+    }
+
     const session = await ShoppingSessionModel.create({
       userId: new mongoose.Types.ObjectId(req.userId!),
       request: input.request,
       budgetPaise: effectiveBudgetPaise,
       preferences: input.preferences || [],
-      peopleCount: input.peopleCount,
-      durationDays: input.durationDays,
+      peopleCount: effectivePeople,
+      durationDays: effectiveDays,
       pincode: input.pincode || "560001",
       cityName: input.cityName || "Bengaluru",
       status: "initializing",
@@ -59,8 +96,8 @@ sessionsRouter.post("/", async (req: AuthenticatedRequest, res: Response) => {
       userRequest: input.request,
       budgetPaise: effectiveBudgetPaise,
       preferences: input.preferences || [],
-      peopleCount: input.peopleCount,
-      durationDays: input.durationDays,
+      peopleCount: effectivePeople,
+      durationDays: effectiveDays,
       pincode: session.pincode,
       cityName: session.cityName,
       retryCount: 0,
