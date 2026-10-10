@@ -23,17 +23,21 @@ export async function rankAndSelectNode(state: ShoppingAgentStateType): Promise<
     stock: c.stock
   }));
 
+  const days = state.durationDays || 7;
+  const people = state.peopleCount || 2;
   const prompt = `
 You are the Recommendation AI Agent.
 User Request: "${state.userRequest}"
 Budget: ₹${budgetPaise / 100} (${budgetPaise} paise)
+Household Size: ${people} people
+Duration: ${days} days (${Math.round(days / 7)} weeks)
 Dietary Preferences: ${JSON.stringify(state.preferences)}
 Target Plan Categories: ${JSON.stringify(plan?.categories)}
 
 Candidate Catalog Products:
 ${JSON.stringify(candidateSummary.slice(0, 40))}
 
-Select the best set of products and recommended quantities to build a full weekly grocery cart.
+Select the best set of products and recommended quantities to build a comprehensive grocery cart for ${people} people covering all ${days} days.
 Crucial constraints:
 - Must only pick product IDs that exist in Candidate Catalog Products above.
 - Total sum (quantity * pricePaise) MUST be strictly <= ${budgetPaise} paise.
@@ -53,6 +57,7 @@ Crucial constraints:
   const fallback = (): Array<{ productId: string; quantity: number; reason: string }> => {
     const selected: Array<{ productId: string; quantity: number; reason: string }> = [];
     let currentTotal = 0;
+    const qtyMultiplier = Math.max(1, Math.min(4, Math.ceil(days / 7)));
 
     const grouped = new Map<string, IProductDocument[]>();
     for (const prod of candidates) {
@@ -68,14 +73,17 @@ Crucial constraints:
         return a.pricePaise - b.pricePaise;
       });
 
-      for (const item of sorted.slice(0, 2)) {
+      for (const item of sorted.slice(0, 3)) {
         const id = (item as any)._id.toString();
-        const cost = item.pricePaise;
-        if (currentTotal + cost <= budgetPaise && item.stock >= 1) {
+        const desiredQty = Math.min(item.stock, qtyMultiplier);
+        const cost = item.pricePaise * desiredQty;
+        if (currentTotal + cost <= budgetPaise && desiredQty >= 1) {
           selected.push({
             productId: id,
-            quantity: 1,
-            reason: item.isHealthy ? "Healthy, nutritious choice within budget." : "Budget-friendly grocery essential."
+            quantity: desiredQty,
+            reason: item.isHealthy
+              ? `Healthy selection provisioned for ${days} days.`
+              : `Grocery staple provisioned for household of ${people}.`
           });
           currentTotal += cost;
         }

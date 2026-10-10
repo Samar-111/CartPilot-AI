@@ -211,6 +211,8 @@ export default function DashboardPage() {
               plan={currentSession.plan}
               proposalVersion={currentSession.proposalVersion}
               validationMessage={currentSession.validationMessage}
+              durationDays={currentSession.durationDays}
+              peopleCount={currentSession.peopleCount}
               onApprove={handleApprove}
               onReject={handleReject}
               isSubmitting={isSubmitting}

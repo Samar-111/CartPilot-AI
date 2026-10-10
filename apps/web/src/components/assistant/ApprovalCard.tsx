@@ -21,6 +21,8 @@ interface ApprovalCardProps {
   plan?: ShoppingPlan;
   proposalVersion: number;
   validationMessage?: string;
+  durationDays?: number;
+  peopleCount?: number;
   onApprove: () => void;
   onReject: (feedback: string) => void;
   isSubmitting: boolean;
@@ -33,6 +35,8 @@ export function ApprovalCard({
   plan,
   proposalVersion,
   validationMessage,
+  durationDays,
+  peopleCount,
   onApprove,
   onReject,
   isSubmitting
@@ -42,6 +46,9 @@ export function ApprovalCard({
 
   const isOverBudget = totalPaise > budgetPaise;
   const percentageSpent = Math.min(100, Math.round((totalPaise / budgetPaise) * 100));
+
+  const daysDisplay = durationDays || plan?.durationDays;
+  const peopleDisplay = peopleCount || plan?.peopleCount;
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-card space-y-6">
@@ -55,7 +62,7 @@ export function ApprovalCard({
               Proposed Cart Assembly
             </h2>
             <p className="text-[11px] text-slate-400">
-              Deterministic line-item assembly verified by Agent 5
+              {daysDisplay ? `${daysDisplay} Days (${Math.round(daysDisplay / 7)} wks)` : "Custom"} • {peopleDisplay ? `${peopleDisplay} Persons` : "Household"} • Verified by Agent 5
             </p>
           </div>
         </div>
