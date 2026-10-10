@@ -54,13 +54,33 @@ export const sampleProducts = [
   { name: "Potato Chips Salted", category: "snacks", pricePaise: 3000, unit: "60g", stock: 50, tags: ["snacks"], isHealthy: false }
 ];
 
+export const storeLocations = [
+  { storeName: "Bengaluru Central DarkStore", pincode: "560001", multiplier: 1.0 },
+  { storeName: "Mumbai West Hub", pincode: "400050", multiplier: 1.05 },
+  { storeName: "Delhi North SuperStore", pincode: "110001", multiplier: 0.98 }
+];
+
 export async function seed(): Promise<void> {
   await connectDB();
-  console.log("Seeding database...");
+  console.log("Seeding database across multi-store locations...");
 
   await ProductModel.deleteMany({});
-  const inserted = await ProductModel.insertMany(sampleProducts);
-  console.log(`Seeded ${inserted.length} products successfully.`);
+  
+  const allStoreProducts: any[] = [];
+  for (const store of storeLocations) {
+    for (const base of sampleProducts) {
+      allStoreProducts.push({
+        ...base,
+        pricePaise: Math.round(base.pricePaise * store.multiplier),
+        storeName: store.storeName,
+        pincode: store.pincode,
+        lastPriceSyncAt: new Date()
+      });
+    }
+  }
+
+  const inserted = await ProductModel.insertMany(allStoreProducts);
+  console.log(`Seeded ${inserted.length} products across 3 cities/stores successfully.`);
 
   const testUser = await UserModel.findOneAndUpdate(
     { email: "user@cartpilot.ai" },
