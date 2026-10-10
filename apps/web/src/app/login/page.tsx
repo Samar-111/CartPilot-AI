@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { User, Mail, ShieldCheck, ArrowRight, Sparkles, LogOut, Terminal } from "lucide-react";
+import { User, Mail, ShieldCheck, ArrowRight, Sparkles, LogOut, Check } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function LoginPage() {
       if (data.token) {
         localStorage.setItem("cartpilot_token", data.token);
         setCurrentUser(data.user);
-        setMessage("Account session saved! Redirecting to Command Center...");
+        setMessage("Account session saved! Redirecting...");
         setTimeout(() => {
           router.push("/dashboard");
         }, 800);
@@ -78,46 +78,46 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16 space-y-6">
+    <div className="max-w-md mx-auto px-4 py-12 space-y-6">
       <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-xl bg-[#141815] border border-[#2E3B31] text-[#C6FF4D] flex items-center justify-center mx-auto shadow-sm">
-          <User className="w-5 h-5" />
+        <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
+          <User className="w-6 h-6" />
         </div>
-        <h1 className="font-display text-2xl font-extrabold text-[#F4F5EF] tracking-tight">
-          {currentUser ? "User Profile" : "Account Access"}
+        <h1 className="font-display text-2xl font-extrabold text-slate-900 tracking-tight">
+          {currentUser ? "Your Account Profile" : "Sign In or Register"}
         </h1>
-        <p className="text-xs text-[#929A91] max-w-sm mx-auto leading-relaxed">
-          Optional user profile for remembering custom diet allocations. All commands work in guest mode.
+        <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+          Optional account creation. You can browse, use the AI Assistant, and checkout even without logging in.
         </p>
       </div>
 
       {message && (
-        <div className="bg-[#141815] border border-[rgba(198,255,77,0.3)] text-[#C6FF4D] text-xs p-3.5 rounded-xl font-mono text-center">
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-xl font-medium text-center">
           {message}
         </div>
       )}
 
       {currentUser ? (
-        <div className="bg-[#141815] rounded-2xl border border-[#2E3B31] p-6 shadow-command space-y-5 font-mono">
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-card space-y-5">
           <div className="space-y-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#667065] block">
-              Active User Identity
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+              Active User
             </span>
-            <div className="font-display font-bold text-[#F4F5EF] text-base">
+            <div className="font-display font-bold text-slate-900 text-base">
               {currentUser.name}
             </div>
-            <div className="text-xs text-[#929A91]">{currentUser.email}</div>
+            <div className="text-xs text-slate-500">{currentUser.email}</div>
           </div>
 
-          <div className="border-t border-[#232B25] pt-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#667065] block mb-2">
-              Saved Dietary Constraints
+          <div className="border-t border-slate-100 pt-3">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+              Saved Dietary Preferences
             </span>
             <div className="flex flex-wrap gap-1.5">
               {currentUser.dietaryPreferences?.map((pref: string) => (
                 <span
                   key={pref}
-                  className="text-[10px] bg-[#0B0D0C] text-[#C6FF4D] px-2.5 py-0.5 rounded-full border border-[rgba(198,255,77,0.3)] capitalize font-semibold"
+                  className="text-[11px] bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200 font-semibold capitalize"
                 >
                   {pref}
                 </span>
@@ -128,15 +128,14 @@ export default function LoginPage() {
           <div className="pt-2 flex flex-col gap-2">
             <Link
               href="/dashboard"
-              className="w-full flex items-center justify-center gap-2 bg-[#C6FF4D] hover:bg-[#B6F53D] text-[#0B0D0C] font-bold py-2.5 rounded-xl text-xs transition-colors shadow-lime-glow"
+              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-xs transition-colors"
             >
-              <Terminal className="w-3.5 h-3.5" />
-              <span>Launch AI Console</span>
+              <span>Go to AI Assistant</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 text-rose-400 hover:bg-rose-950/30 border border-rose-800 font-semibold py-2.5 rounded-xl text-xs transition-colors"
+              className="w-full flex items-center justify-center gap-2 text-rose-600 hover:bg-rose-50 border border-rose-200 font-semibold py-2.5 rounded-xl text-xs transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Log Out</span>
@@ -144,39 +143,39 @@ export default function LoginPage() {
           </div>
         </div>
       ) : (
-        <form onSubmit={handleAuthSubmit} className="bg-[#141815] rounded-2xl border border-[#2E3B31] p-6 shadow-command space-y-4 font-mono">
+        <form onSubmit={handleAuthSubmit} className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-card space-y-4">
           <div>
-            <label className="block text-xs text-[#929A91] mb-1">
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-[#667065] absolute left-3 top-3" />
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
                 type="email"
                 required
-                placeholder="you@domain.com"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl border border-[#2E3B31] bg-[#0B0D0C] text-[#F4F5EF] focus:outline-none focus:border-[#C6FF4D]"
+                className="w-full pl-9 pr-3.5 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs text-[#929A91] mb-1">
-              Display Name <span className="text-[#667065]">(Optional)</span>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Full Name <span className="text-slate-400 font-normal">(Optional)</span>
             </label>
             <input
               type="text"
               placeholder="Your Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#2E3B31] bg-[#0B0D0C] text-[#F4F5EF] focus:outline-none focus:border-[#C6FF4D]"
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
             />
           </div>
 
           <div>
-            <label className="block text-xs text-[#929A91] mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Default Dietary Profile
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -187,10 +186,10 @@ export default function LoginPage() {
                     type="button"
                     key={pref}
                     onClick={() => toggleDiet(pref)}
-                    className={`text-[10px] px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                    className={`text-[11px] px-2.5 py-1 rounded-full font-semibold transition-all ${
                       active
-                        ? "bg-[#C6FF4D] text-[#0B0D0C] font-bold"
-                        : "bg-[#0B0D0C] text-[#929A91] border border-[#232B25] hover:border-[#2E3B31]"
+                        ? "bg-emerald-600 text-white"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     {pref}
@@ -203,13 +202,13 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-[#C6FF4D] hover:bg-[#B6F53D] disabled:bg-[#1B211C] text-[#0B0D0C] font-bold py-3 px-4 rounded-xl text-xs transition-all shadow-lime-glow mt-2"
+            className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-semibold py-3 px-4 rounded-xl text-xs transition-all shadow-md shadow-emerald-600/20 mt-2"
           >
             {loading ? (
               <span>Saving Session...</span>
             ) : (
               <>
-                <Terminal className="w-3.5 h-3.5" />
+                <Sparkles className="w-3.5 h-3.5" />
                 <span>Save Profile & Continue</span>
               </>
             )}
@@ -218,16 +217,16 @@ export default function LoginPage() {
           <div className="text-center pt-2">
             <Link
               href="/dashboard"
-              className="text-[11px] text-[#667065] hover:text-[#C6FF4D] underline font-medium"
+              className="text-[11px] text-slate-500 hover:text-emerald-600 underline font-medium"
             >
-              Skip and continue in Guest Mode
+              Skip and continue as Guest
             </Link>
           </div>
         </form>
       )}
 
-      <div className="flex items-center justify-center gap-1.5 text-[10px] font-mono text-[#667065] text-center">
-        <ShieldCheck className="w-3.5 h-3.5 text-[#C6FF4D]" />
+      <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 text-center">
+        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
         <span>No compulsory passwords or email verification required</span>
       </div>
     </div>

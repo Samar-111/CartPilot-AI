@@ -6,12 +6,15 @@ import {
   CreditCard,
   MapPin,
   ShieldCheck,
+  CheckCircle2,
   AlertTriangle,
+  ArrowRight,
   ShoppingBag,
   Lock
 } from "lucide-react";
 import { paiseToRupees } from "@cartpilot/shared";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface CartData {
   id: string;
@@ -97,7 +100,7 @@ export default function CheckoutPage() {
           contact: address.phone
         },
         theme: {
-          color: "#C6FF4D"
+          color: "#059669"
         },
         handler: async function (response: any) {
           try {
@@ -157,145 +160,145 @@ export default function CheckoutPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto py-24 text-center space-y-3 font-mono">
-        <div className="w-8 h-8 border-2 border-[#C6FF4D] border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-xs text-[#929A91]">Preparing checkout order session...</p>
+      <div className="max-w-4xl mx-auto py-20 text-center space-y-3">
+        <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="text-xs text-slate-400">Preparing checkout order...</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div className="border-b border-[#232B25] pb-5">
-        <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[#C6FF4D] mb-1">
+      <div className="border-b border-slate-200/80 pb-5">
+        <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-1">
           <CreditCard className="w-3.5 h-3.5" />
-          <span>SECURE GATEWAY CHECKOUT</span>
+          <span>Secure Gateway</span>
         </div>
-        <h1 className="font-display text-3xl font-extrabold text-[#F4F5EF] tracking-tight">
-          Checkout & Settlement
+        <h1 className="font-display text-3xl font-extrabold text-slate-900 tracking-tight">
+          Checkout & Payment
         </h1>
-        <p className="text-xs sm:text-sm text-[#929A91] mt-1">
+        <p className="text-sm text-slate-500 mt-1">
           Server-validated order creation with cryptographic Razorpay signature checks.
         </p>
       </div>
 
       {errorMsg && (
-        <div className="bg-rose-950/40 border border-rose-800 p-4 rounded-xl flex items-start gap-3 text-xs text-rose-300">
-          <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+        <div className="bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-start gap-3 text-xs text-rose-800">
+          <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
           <p>{errorMsg}</p>
         </div>
       )}
 
       <form onSubmit={handlePayWithRazorpay} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-7 bg-[#141815] rounded-2xl border border-[#2E3B31] p-6 shadow-command space-y-6">
-          <div className="flex items-center gap-2 border-b border-[#232B25] pb-3">
-            <MapPin className="w-4 h-4 text-[#C6FF4D]" />
-            <h2 className="font-display font-bold text-[#F4F5EF] text-base">
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-card space-y-6">
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <MapPin className="w-4 h-4 text-emerald-600" />
+            <h2 className="font-display font-bold text-slate-900 text-base">
               Delivery Destination
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-mono text-[#929A91] mb-1">Full Name</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Full Name</label>
               <input
                 type="text"
                 required
                 value={address.fullName}
                 onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
-                className="w-full text-xs rounded-xl border border-[#2E3B31] p-2.5 bg-[#0B0D0C] text-[#F4F5EF] focus:outline-none focus:border-[#C6FF4D] font-medium"
+                className="w-full text-xs rounded-xl border border-slate-200 p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-[#929A91] mb-1">Phone Number</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Phone Number</label>
               <input
                 type="tel"
                 required
                 value={address.phone}
                 onChange={(e) => setAddress({ ...address, phone: e.target.value })}
-                className="w-full text-xs rounded-xl border border-[#2E3B31] p-2.5 bg-[#0B0D0C] text-[#F4F5EF] focus:outline-none focus:border-[#C6FF4D] font-medium"
+                className="w-full text-xs rounded-xl border border-slate-200 p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-mono text-[#929A91] mb-1">Street Address</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Street Address</label>
               <input
                 type="text"
                 required
                 value={address.street}
                 onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                className="w-full text-xs rounded-xl border border-[#2E3B31] p-2.5 bg-[#0B0D0C] text-[#F4F5EF] focus:outline-none focus:border-[#C6FF4D] font-medium"
+                className="w-full text-xs rounded-xl border border-slate-200 p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-[#929A91] mb-1">City</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">City</label>
               <input
                 type="text"
                 required
                 value={address.city}
                 onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                className="w-full text-xs rounded-xl border border-[#2E3B31] p-2.5 bg-[#0B0D0C] text-[#F4F5EF] focus:outline-none focus:border-[#C6FF4D] font-medium"
+                className="w-full text-xs rounded-xl border border-slate-200 p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-[#929A91] mb-1">Postal Code (PIN)</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Postal Code (PIN)</label>
               <input
                 type="text"
                 required
                 value={address.pincode}
                 onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
-                className="w-full text-xs rounded-xl border border-[#2E3B31] p-2.5 bg-[#0B0D0C] text-[#F4F5EF] focus:outline-none focus:border-[#C6FF4D] font-medium"
+                className="w-full text-xs rounded-xl border border-slate-200 p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
               />
             </div>
           </div>
 
-          <div className="pt-4 border-t border-[#232B25] flex items-center justify-between font-mono">
-            <span className="text-xs text-[#667065]">Gateway Mode:</span>
-            <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[rgba(198,255,77,0.12)] text-[#C6FF4D] border border-[rgba(198,255,77,0.3)]">
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-xs text-slate-500">Gateway Mode:</span>
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
               Razorpay Test / Sandbox Active
             </span>
           </div>
         </div>
 
-        <div className="lg:col-span-5 bg-[#141815] rounded-2xl border border-[#2E3B31] p-6 shadow-command space-y-6 sticky top-24 font-mono">
-          <div className="flex items-center gap-2 border-b border-[#232B25] pb-3">
-            <ShoppingBag className="w-4 h-4 text-[#8DCBFF]" />
-            <h2 className="font-display font-bold text-[#F4F5EF] text-base">
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-card space-y-6 sticky top-24">
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <ShoppingBag className="w-4 h-4 text-emerald-600" />
+            <h2 className="font-display font-bold text-slate-900 text-base">
               Order Breakdown
             </h2>
           </div>
 
-          <div className="divide-y divide-[#1F2620] max-h-56 overflow-y-auto pr-1">
+          <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto pr-1">
             {cart?.items.map((item) => (
               <div key={item.productId} className="py-2.5 flex items-center justify-between text-xs">
                 <div>
-                  <div className="font-semibold text-[#F4F5EF]">{item.name}</div>
-                  <div className="text-[10px] text-[#667065]">
+                  <div className="font-semibold text-slate-900">{item.name}</div>
+                  <div className="text-[10px] text-slate-400">
                     {item.quantity} × {paiseToRupees(item.unitPricePaise)}
                   </div>
                 </div>
-                <div className="font-bold text-[#F4F5EF]">{paiseToRupees(item.subtotalPaise)}</div>
+                <div className="font-bold text-slate-900">{paiseToRupees(item.subtotalPaise)}</div>
               </div>
             ))}
           </div>
 
-          <div className="border-t border-[#232B25] pt-3 space-y-2 text-xs text-[#929A91]">
-            <div className="flex justify-between">
+          <div className="border-t border-slate-100 pt-3 space-y-2 text-xs">
+            <div className="flex justify-between text-slate-600">
               <span>Items Total:</span>
-              <span className="font-semibold text-[#F4F5EF]">{paiseToRupees(cart?.totalPaise || 0)}</span>
+              <span className="font-semibold text-slate-900">{paiseToRupees(cart?.totalPaise || 0)}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between text-slate-600">
               <span>Delivery Fee:</span>
-              <span className="font-semibold text-[#C6FF4D]">FREE</span>
+              <span className="font-semibold text-emerald-600">FREE</span>
             </div>
           </div>
 
-          <div className="border-t border-[#232B25] pt-3 flex justify-between items-baseline">
-            <span className="text-xs text-[#929A91]">Final Payable Amount:</span>
-            <span className="font-display text-2xl font-extrabold text-[#F4F5EF]">
+          <div className="border-t border-slate-100 pt-3 flex justify-between items-baseline">
+            <span className="text-xs font-semibold text-slate-500">Final Amount Payable:</span>
+            <span className="font-display text-2xl font-extrabold text-slate-900">
               {paiseToRupees(cart?.totalPaise || 0)}
             </span>
           </div>
@@ -304,17 +307,17 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={processing}
-              className="w-full flex items-center justify-center gap-2 bg-[#C6FF4D] hover:bg-[#B6F53D] disabled:bg-[#1B211C] disabled:text-[#667065] text-[#0B0D0C] font-bold py-3.5 px-4 rounded-xl text-sm transition-all shadow-lime-glow"
+              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-semibold py-3.5 px-4 rounded-xl text-sm transition-all shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/30"
             >
               {processing ? (
                 <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-[#0B0D0C] border-t-transparent rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                   <span>Verifying Transaction...</span>
                 </span>
               ) : (
                 <>
                   <Lock className="w-4 h-4" />
-                  <span>Pay {paiseToRupees(cart?.totalPaise || 0)} (Razorpay Gateway)</span>
+                  <span>Pay {paiseToRupees(cart?.totalPaise || 0)} (Razorpay Test Gateway)</span>
                 </>
               )}
             </button>
@@ -349,14 +352,14 @@ export default function CheckoutPage() {
                   setProcessing(false);
                 }
               }}
-              className="w-full flex items-center justify-center gap-1.5 border border-[#2E3B31] hover:border-[#8DCBFF] text-[#F4F5EF] font-semibold py-2.5 px-4 rounded-xl text-xs transition-colors bg-[#0B0D0C]"
+              className="w-full flex items-center justify-center gap-1.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-2.5 px-4 rounded-xl text-xs transition-colors"
             >
-              <span>Instant Test Settlement (Direct HMAC Verification)</span>
+              <span>Instant Test Payment (Direct Signature Verification)</span>
             </button>
           </div>
 
-          <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#667065] text-center">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#C6FF4D]" />
+          <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 text-center">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
             <span>Strict server-side price recalculation enforced</span>
           </div>
         </div>

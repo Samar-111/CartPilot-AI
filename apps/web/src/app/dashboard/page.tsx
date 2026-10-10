@@ -7,7 +7,6 @@ import { ApprovalCard } from "@/components/assistant/ApprovalCard";
 import { apiFetch } from "@/lib/api";
 import { AgentEvent, ShoppingSession } from "@cartpilot/shared";
 import { useRouter } from "next/navigation";
-import { Terminal, Shield, Activity, Sparkles } from "lucide-react";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -59,7 +58,9 @@ export default function DashboardPage() {
         ) {
           setIsLoading(false);
         }
-      } catch (err) {}
+      } catch (err) {
+        // ignore
+      }
     };
 
     eventSource.addEventListener("agent_event", (e) => {
@@ -76,7 +77,9 @@ export default function DashboardPage() {
       }
     });
 
-    eventSource.onerror = () => {};
+    eventSource.onerror = () => {
+      // If SSE errors, polling below guarantees updates
+    };
 
     const pollInterval = setInterval(() => {
       updateSession();
@@ -152,34 +155,15 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#232B25] pb-6">
-        <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[#C6FF4D] mb-1">
-            <Terminal className="w-3.5 h-3.5" />
-            <span>AI SHOPPING COMMAND CENTER</span>
-          </div>
-          <h1 className="font-display text-3xl font-extrabold text-[#F4F5EF] tracking-tight">
-            Autonomous Workforce Console
-          </h1>
-          <p className="text-xs sm:text-sm text-[#929A91] mt-1 max-w-xl">
-            Live multi-agent orchestration for constraint-based weekly grocery shopping. Coordinated graph state streamed via SSE.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="px-3 py-1.5 rounded-lg bg-[#141815] border border-[#232B25] text-xs font-mono text-[#929A91] flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#C6FF4D] animate-ping" />
-            <span>LangGraph Engine</span>
-          </div>
-          <div className="px-3 py-1.5 rounded-lg bg-[#141815] border border-[#232B25] text-xs font-mono text-[#8DCBFF] flex items-center gap-2">
-            <Shield className="w-3.5 h-3.5" />
-            <span>Strict Guardrails</span>
-          </div>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">CartPilot AI Workforce</h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Autonomous multi-agent orchestration for constraint-based weekly grocery shopping.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-6 space-y-6">
           <ChatPanel onSubmit={handleLaunchWorkflow} isLoading={isLoading} />
           {currentSession && (
@@ -197,10 +181,10 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="lg:col-span-6 sticky top-24">
+        <div className="lg:col-span-6">
           <AgentTimeline
             events={events}
-            currentStatus={currentSession?.status || "Ready for Mission"}
+            currentStatus={currentSession?.status || "Idle"}
           />
         </div>
       </div>

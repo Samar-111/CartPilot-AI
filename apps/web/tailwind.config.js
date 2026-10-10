@@ -8,47 +8,49 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bg: {
-          main: "#0B0D0C",
-          secondary: "#141815",
-          elevated: "#1B211C",
-          card: "#121613"
+        brand: {
+          50: "#f0fdf4",
+          100: "#dcfce7",
+          200: "#bbf7d0",
+          300: "#86efac",
+          400: "#4ade80",
+          500: "#22c55e",
+          600: "#16a34a",
+          700: "#15803d",
+          800: "#166534",
+          900: "#14532d",
+          950: "#052e16"
+        },
+        emerald: {
+          50: "#ecfdf5",
+          100: "#d1fae5",
+          200: "#a7f3d0",
+          300: "#6ee7b7",
+          400: "#34d399",
+          500: "#10b981",
+          600: "#059669",
+          700: "#047857",
+          800: "#065f46",
+          900: "#064e3b"
         },
         surface: {
-          border: "#232B25",
-          borderSubtle: "#1A221C",
-          borderHighlight: "#2E3B31"
-        },
-        lime: {
-          DEFAULT: "#C6FF4D",
-          accent: "#C6FF4D",
-          hover: "#B6F53D",
-          muted: "rgba(198, 255, 77, 0.15)",
-          subtle: "rgba(198, 255, 77, 0.08)"
-        },
-        ice: {
-          DEFAULT: "#8DCBFF",
-          accent: "#8DCBFF",
-          muted: "rgba(141, 203, 255, 0.15)",
-          subtle: "rgba(141, 203, 255, 0.08)"
-        },
-        content: {
-          primary: "#F4F5EF",
-          secondary: "#929A91",
-          muted: "#667065",
-          faint: "#3F473E"
+          50: "#fbfcfd",
+          100: "#f8fafc",
+          200: "#f1f5f9",
+          300: "#e2e8f0",
+          800: "#1e293b",
+          900: "#0f172a"
         }
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        display: ["var(--font-space-grotesk)", "Space Grotesk", "sans-serif"],
-        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
+        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-manrope)", "Manrope", "system-ui", "sans-serif"]
       },
       boxShadow: {
-        "command": "0 20px 40px -15px rgba(0, 0, 0, 0.8)",
-        "lime-glow": "0 0 25px -4px rgba(198, 255, 77, 0.28)",
-        "ice-glow": "0 0 25px -4px rgba(141, 203, 255, 0.22)",
-        "panel": "0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.04)"
+        subtle: "0 1px 2px 0 rgba(0, 0, 0, 0.04)",
+        card: "0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)",
+        premium: "0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.02)",
+        glow: "0 0 25px -5px rgba(16, 185, 129, 0.25)"
       }
     }
   },

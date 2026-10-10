@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -11,15 +11,15 @@ const inter = Inter({
   display: "swap"
 });
 
-const spaceGrotesk = Space_Grotesk({
+const manrope = Manrope({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  variable: "--font-manrope",
   display: "swap"
 });
 
 export const metadata: Metadata = {
-  title: "CartPilot AI — AI Shopping Command Center",
-  description: "Autonomous multi-agent shopping workforce coordinating budget planning, catalog research, and cart execution."
+  title: "CartPilot AI — Autonomous E-Commerce Shopping Workforce",
+  description: "Intelligently orchestrate your weekly grocery shopping with autonomous AI agents coordinating budget planning, live catalog research, and cart execution."
 };
 
 export default function RootLayout({
@@ -28,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} dark`}>
-      <body className="min-h-screen flex flex-col bg-[#0B0D0C] text-[#F4F5EF] font-sans antialiased selection:bg-[#C6FF4D] selection:text-[#0B0D0C]">
+    <html lang="en" className={`${inter.variable} ${manrope.variable}`}>
+      <body className="min-h-screen flex flex-col bg-[#fafbfc] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <Navbar />
         <main className="flex-1 w-full">{children}</main>
