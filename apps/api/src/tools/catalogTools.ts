@@ -22,6 +22,14 @@ export async function searchProducts(input: ProductSearchInput): Promise<IProduc
     filter.tags = { $in: parsed.tags };
   }
 
+  if (parsed.pincode) {
+    filter.pincode = parsed.pincode;
+  }
+
+  if (parsed.storeName) {
+    filter.storeName = parsed.storeName;
+  }
+
   if (parsed.query && parsed.query.trim().length > 0) {
     const regex = new RegExp(parsed.query.trim(), "i");
     filter.$or = [{ name: regex }, { tags: regex }];

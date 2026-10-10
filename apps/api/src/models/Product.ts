@@ -11,6 +11,9 @@ export interface IProductDocument extends Document {
   isHealthy: boolean;
   isActive: boolean;
   image?: string;
+  storeName?: string;
+  pincode?: string;
+  lastPriceSyncAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,7 +28,10 @@ const ProductSchema = new Schema<IProductDocument>(
     tags: [{ type: String, index: true }],
     isHealthy: { type: Boolean, default: false, index: true },
     isActive: { type: Boolean, default: true, index: true },
-    image: { type: String }
+    image: { type: String },
+    storeName: { type: String, default: "Bengaluru Central DarkStore", index: true },
+    pincode: { type: String, default: "560001", index: true },
+    lastPriceSyncAt: { type: Date, default: Date.now }
   },
   { timestamps: true }
 );

@@ -14,6 +14,9 @@ interface ProductItem {
   stock: number;
   tags: string[];
   isHealthy: boolean;
+  storeName?: string;
+  pincode?: string;
+  lastPriceSyncAt?: string;
 }
 
 export default function ProductsPage() {
@@ -22,8 +25,16 @@ export default function ProductsPage() {
   const [category, setCategory] = useState("");
   const [onlyHealthy, setOnlyHealthy] = useState(false);
   const [sortBy, setSortBy] = useState<"featured" | "price-asc" | "price-desc">("featured");
+  const [selectedCity, setSelectedCity] = useState("560001");
+  const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
+
+  const stores = [
+    { city: "Bengaluru Central (560001)", pincode: "560001", store: "Bengaluru Central DarkStore" },
+    { city: "Mumbai Bandra (400050)", pincode: "400050", store: "Mumbai West Hub" },
+    { city: "Delhi NCR (110001)", pincode: "110001", store: "Delhi North SuperStore" }
+  ];
 
   const categories = [
     "fruits",
@@ -37,6 +48,40 @@ export default function ProductsPage() {
     "staples"
   ];
 
+  const handleLivePriceSync = async () => {
+    setSyncing(true);
+    try {
+      const activeStore = stores.find(s => s.pincode === selectedCity);
+      const syncPayload = products.map(p => {
+        const delta = Math.floor((Math.random() - 0.45) * 1000);
+        const newPrice = Math.max(1000, p.pricePaise + delta);
+        return {
+          name: p.name,
+          pricePaise: newPrice,
+          category: p.category,
+          unit: p.unit,
+          stock: p.stock
+        };
+      });
+
+      await apiFetch("/products/sync", {
+        method: "POST",
+        body: JSON.stringify({
+          items: syncPayload,
+          storeName: activeStore?.store,
+          pincode: activeStore?.pincode
+        })
+      });
+
+      const res = await apiFetch<{ products: ProductItem[] }>(`/products?pincode=${selectedCity}`);
+      setProducts(res.products || []);
+    } catch (err: any) {
+      alert(`Sync failed: ${err.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -45,6 +90,7 @@ export default function ProductsPage() {
         if (search) queryParams.set("query", search);
         if (category) queryParams.set("category", category);
         if (onlyHealthy) queryParams.set("isHealthy", "true");
+        if (selectedCity) queryParams.set("pincode", selectedCity);
 
         const res = await apiFetch<{ products: ProductItem[] }>(`/products?${queryParams.toString()}`);
         let items = res.products || [];
@@ -108,7 +154,29 @@ export default function ProductsPage() {
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="py-2 px-3 text-xs rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
+            >
+              {stores.map((s) => (
+                <option key={s.pincode} value={s.pincode}>
+                  {s.city}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={handleLivePriceSync}
+              disabled={syncing}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-white transition-all shadow-sm"
+              title="Simulates real-time merchant price updates & inventory changes"
+            >
+              <ArrowUpDown className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
+              <span>{syncing ? "Syncing..." : "Sync Live Prices"}</span>
+            </button>
+
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
@@ -214,7 +282,13 @@ export default function ProductsPage() {
                   <h3 className="font-display font-bold text-slate-900 text-sm group-hover:text-emerald-700 transition-colors line-clamp-2">
                     {p.name}
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">{p.unit}</p>
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mt-1">
+                    <span>{p.unit}</span>
+                    <span>•</span>
+                    <span className="text-emerald-700 font-medium truncate max-w-[140px]">
+                      {p.storeName || "Central DarkStore"}
+                    </span>
+                  </div>
 
                   <div className="flex flex-wrap gap-1 mt-3">
                     {p.tags.slice(0, 3).map((tag) => (

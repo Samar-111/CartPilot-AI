@@ -6,13 +6,15 @@ export const productsRouter = Router();
 
 productsRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const { category, query, maxPricePaise, isHealthy, limit } = req.query;
+    const { category, query, maxPricePaise, isHealthy, pincode, storeName, limit } = req.query;
 
     const products = await searchProducts({
       category: category ? (category as any) : undefined,
       query: query ? String(query) : undefined,
       maxPricePaise: maxPricePaise ? parseInt(String(maxPricePaise), 10) : undefined,
       isHealthy: isHealthy !== undefined ? isHealthy === "true" : undefined,
+      pincode: pincode ? String(pincode) : undefined,
+      storeName: storeName ? String(storeName) : undefined,
       limit: limit ? parseInt(String(limit), 10) : 50
     });
 
@@ -27,11 +29,53 @@ productsRouter.get("/", async (req: Request, res: Response) => {
         stock: p.stock,
         tags: p.tags,
         isHealthy: p.isHealthy,
-        image: p.image
+        image: p.image,
+        storeName: p.storeName || "Bengaluru Central DarkStore",
+        pincode: p.pincode || "560001",
+        lastPriceSyncAt: p.lastPriceSyncAt
       }))
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to fetch products" });
+  }
+});
+
+productsRouter.post("/sync", async (req: Request, res: Response) => {
+  try {
+    const { items, storeName, pincode } = req.body;
+    if (!Array.isArray(items) || items.length === 0) {
+      res.status(400).json({ error: "items array is required" });
+      return;
+    }
+
+    let updatedCount = 0;
+    for (const item of items) {
+      if (!item.name || !item.pricePaise) continue;
+
+      await ProductModel.findOneAndUpdate(
+        { name: item.name },
+        {
+          pricePaise: item.pricePaise,
+          stock: item.stock !== undefined ? item.stock : 50,
+          unit: item.unit || "unit",
+          category: item.category || "staples",
+          storeName: storeName || item.storeName || "Bengaluru Central DarkStore",
+          pincode: pincode || item.pincode || "560001",
+          lastPriceSyncAt: new Date()
+        },
+        { upsert: true, new: true }
+      );
+      updatedCount++;
+    }
+
+    res.json({
+      message: `Successfully synchronized ${updatedCount} products with live store catalog!`,
+      storeName: storeName || "Bengaluru Central DarkStore",
+      pincode: pincode || "560001",
+      syncedAt: new Date()
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || "Failed to sync products" });
   }
 });
 

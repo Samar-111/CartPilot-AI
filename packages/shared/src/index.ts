@@ -44,7 +44,9 @@ export const ProductSchema = z.object({
   tags: z.array(z.string()).default([]),
   isHealthy: z.boolean().default(false),
   isActive: z.boolean().default(true),
-  image: z.string().optional()
+  image: z.string().optional(),
+  storeName: z.string().default("Bengaluru Central DarkStore"),
+  pincode: z.string().default("560001")
 });
 export type Product = z.infer<typeof ProductSchema>;
 
@@ -180,6 +182,8 @@ export const ProductSearchInputSchema = z.object({
   maxPricePaise: z.number().int().positive().optional(),
   tags: z.array(z.string()).optional(),
   isHealthy: z.boolean().optional(),
+  pincode: z.string().optional(),
+  storeName: z.string().optional(),
   limit: z.number().int().min(1).max(50).default(20)
 });
 export type ProductSearchInput = z.infer<typeof ProductSearchInputSchema>;
