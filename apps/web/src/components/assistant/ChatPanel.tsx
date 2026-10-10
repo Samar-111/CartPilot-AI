@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, Send, IndianRupee, Users, Calendar, Lightbulb, Compass } from "lucide-react";
+import { Terminal, Send, Users, Calendar, Compass, Shield } from "lucide-react";
 
 interface ChatPanelProps {
   onSubmit: (data: {
@@ -59,26 +59,31 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-card space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+    <div className="bg-[#141815] rounded-2xl border border-[#2E3B31] p-6 shadow-command space-y-6">
+      <div className="flex items-center justify-between border-b border-[#232B25] pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <Sparkles className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-lg bg-[#1B211C] border border-[#2E3B31] flex items-center justify-center text-[#C6FF4D]">
+            <Terminal className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="font-display font-bold text-slate-900 text-base">
-              Autonomous Shopping Workforce
+            <h2 className="font-display font-bold text-[#F4F5EF] text-base">
+              Shopping Mission Directives
             </h2>
-            <p className="text-[11px] text-slate-400">
-              Coordinated LangGraph agents executing planning, discovery, & verification
+            <p className="text-[11px] font-mono text-[#929A91]">
+              Natural language input & parameter orchestration
             </p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0B0D0C] border border-[#232B25] text-[10px] font-mono text-[#C6FF4D]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#C6FF4D] animate-ping" />
+          <span>PORT 5000: CONNECTED</span>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+          <label className="block text-[11px] font-mono uppercase tracking-wider text-[#929A91] mb-2">
             Shopping Prompt & Instructions
           </label>
           <div className="relative">
@@ -86,16 +91,16 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
               value={request}
               onChange={(e) => setRequest(e.target.value)}
               rows={3}
-              className="w-full text-xs sm:text-sm rounded-xl border border-slate-200 p-3.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50/50 leading-relaxed"
-              placeholder="E.g. I need groceries for one week for two people under ₹2,000..."
+              className="w-full text-xs sm:text-sm rounded-xl border border-[#2E3B31] p-3.5 focus:outline-none focus:border-[#C6FF4D] bg-[#0B0D0C] text-[#F4F5EF] leading-relaxed font-sans placeholder-[#667065]"
+              placeholder="Describe your shopping requirements in plain English..."
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
-            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5">
-              <IndianRupee className="w-3.5 h-3.5 text-emerald-600" /> Budget Cap
+          <div className="bg-[#0B0D0C] p-3 rounded-xl border border-[#232B25]">
+            <label className="flex items-center gap-1.5 text-xs font-mono text-[#929A91] mb-1.5">
+              <span className="text-[#C6FF4D]">₹</span> Budget Cap
             </label>
             <input
               type="number"
@@ -103,14 +108,14 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
               onChange={(e) => setBudgetRupees(Number(e.target.value))}
               min={100}
               step={50}
-              className="w-full text-sm font-semibold rounded-lg border border-slate-200 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full text-sm font-mono font-bold rounded-lg border border-[#2E3B31] bg-[#141815] text-[#F4F5EF] p-2 focus:outline-none focus:border-[#C6FF4D]"
             />
-            <span className="text-[10px] text-slate-400 mt-1 block">Maximum spend limit</span>
+            <span className="text-[10px] font-mono text-[#667065] mt-1 block">Hard ceiling limit</span>
           </div>
 
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
-            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5">
-              <Users className="w-3.5 h-3.5 text-indigo-600" /> People
+          <div className="bg-[#0B0D0C] p-3 rounded-xl border border-[#232B25]">
+            <label className="flex items-center gap-1.5 text-xs font-mono text-[#929A91] mb-1.5">
+              <Users className="w-3.5 h-3.5 text-[#8DCBFF]" /> Household
             </label>
             <input
               type="number"
@@ -118,14 +123,14 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
               onChange={(e) => setPeopleCount(Number(e.target.value))}
               min={1}
               max={10}
-              className="w-full text-sm font-semibold rounded-lg border border-slate-200 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full text-sm font-mono font-bold rounded-lg border border-[#2E3B31] bg-[#141815] text-[#F4F5EF] p-2 focus:outline-none focus:border-[#C6FF4D]"
             />
-            <span className="text-[10px] text-slate-400 mt-1 block">Household size</span>
+            <span className="text-[10px] font-mono text-[#667065] mt-1 block">Number of people</span>
           </div>
 
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
-            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5">
-              <Calendar className="w-3.5 h-3.5 text-amber-600" /> Duration
+          <div className="bg-[#0B0D0C] p-3 rounded-xl border border-[#232B25]">
+            <label className="flex items-center gap-1.5 text-xs font-mono text-[#929A91] mb-1.5">
+              <Calendar className="w-3.5 h-3.5 text-[#C6FF4D]" /> Duration
             </label>
             <input
               type="number"
@@ -133,15 +138,15 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
               onChange={(e) => setDurationDays(Number(e.target.value))}
               min={1}
               max={30}
-              className="w-full text-sm font-semibold rounded-lg border border-slate-200 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full text-sm font-mono font-bold rounded-lg border border-[#2E3B31] bg-[#141815] text-[#F4F5EF] p-2 focus:outline-none focus:border-[#C6FF4D]"
             />
-            <span className="text-[10px] text-slate-400 mt-1 block">Days of groceries</span>
+            <span className="text-[10px] font-mono text-[#667065] mt-1 block">Days of supplies</span>
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-2">
-            Nutritional & Dietary Filters
+          <label className="block text-[11px] font-mono uppercase tracking-wider text-[#929A91] mb-2">
+            Nutritional & Dietary Constraints
           </label>
           <div className="flex flex-wrap gap-2">
             {[
@@ -157,10 +162,10 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
                   type="button"
                   key={p.id}
                   onClick={() => togglePref(p.id)}
-                  className={`text-xs px-3 py-1.5 rounded-full font-semibold transition-all ${
+                  className={`text-xs px-3 py-1.5 rounded-lg font-mono font-medium transition-all ${
                     active
-                      ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/20"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200/80"
+                      ? "bg-[#C6FF4D] text-[#0B0D0C] font-bold shadow-lime-glow"
+                      : "bg-[#0B0D0C] border border-[#232B25] text-[#929A91] hover:text-[#F4F5EF] hover:border-[#2E3B31]"
                   }`}
                 >
                   {p.label}
@@ -171,9 +176,9 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
         </div>
 
         <div>
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+          <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-[#667065] mb-2">
             <Compass className="w-3.5 h-3.5" />
-            <span>Suggested Prompts</span>
+            <span>Preset Shopping Scenarios</span>
           </div>
           <div className="space-y-1.5">
             {samplePrompts.map((p, idx) => (
@@ -181,12 +186,12 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
                 type="button"
                 key={idx}
                 onClick={() => setRequest(p.text)}
-                className="w-full text-left p-2.5 rounded-xl hover:bg-emerald-50/50 border border-transparent hover:border-emerald-200/60 transition-colors group"
+                className="w-full text-left p-2.5 rounded-lg bg-[#0B0D0C] hover:bg-[#1B211C] border border-[#232B25] hover:border-[#2E3B31] transition-all group"
               >
-                <div className="text-xs font-semibold text-slate-800 group-hover:text-emerald-700">
+                <div className="text-xs font-mono font-bold text-[#F4F5EF] group-hover:text-[#C6FF4D]">
                   {p.title}
                 </div>
-                <div className="text-[11px] text-slate-500 truncate">{p.text}</div>
+                <div className="text-[11px] text-[#929A91] truncate font-sans">{p.text}</div>
               </button>
             ))}
           </div>
@@ -195,12 +200,12 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-semibold py-3.5 px-6 rounded-xl transition-all shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/30 text-sm"
+          className="w-full flex items-center justify-center gap-2 bg-[#C6FF4D] hover:bg-[#B6F53D] disabled:bg-[#1B211C] disabled:text-[#667065] text-[#0B0D0C] font-bold py-3.5 px-6 rounded-xl transition-all shadow-lime-glow text-xs sm:text-sm"
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              <span>Workforce Co-Ordinating Execution...</span>
+              <span className="w-4 h-4 border-2 border-[#0B0D0C] border-t-transparent rounded-full animate-spin" />
+              <span>Agents Coordinating Workflow...</span>
             </span>
           ) : (
             <>
