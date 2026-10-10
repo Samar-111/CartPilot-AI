@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { User, Mail, ShieldCheck, ArrowRight, Sparkles, LogOut, Check } from "lucide-react";
 
+import { apiFetch } from "@/lib/api";
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -17,10 +19,7 @@ export default function LoginPage() {
   useEffect(() => {
     const token = localStorage.getItem("cartpilot_token");
     if (token) {
-      fetch("http://localhost:5000/api/v1/auth/me", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then((res) => (res.ok ? res.json() : null))
+      apiFetch<any>("/auth/me")
         .then((data) => {
           if (data) setCurrentUser(data);
         })
@@ -43,18 +42,14 @@ export default function LoginPage() {
     setLoading(true);
     setMessage(null);
     try {
-      const res = await fetch("http://localhost:5000/api/v1/auth/login", {
+      const data = await apiFetch<{ token: string; user: any }>("/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
           name: name.trim() || undefined,
           dietaryPreferences: dietary
         })
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Authentication failed");
 
       if (data.token) {
         localStorage.setItem("cartpilot_token", data.token);

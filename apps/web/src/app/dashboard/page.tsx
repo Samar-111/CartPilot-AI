@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { ChatPanel } from "@/components/assistant/ChatPanel";
 import { AgentTimeline } from "@/components/assistant/AgentTimeline";
 import { ApprovalCard } from "@/components/assistant/ApprovalCard";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, API_BASE } from "@/lib/api";
 import { AgentEvent, ShoppingSession } from "@cartpilot/shared";
 import { useRouter } from "next/navigation";
 
@@ -20,14 +20,12 @@ export default function DashboardPage() {
       try {
         let token = localStorage.getItem("cartpilot_token");
         if (!token) {
-          const res = await fetch("http://localhost:5000/api/v1/auth/login", {
+          const res = await apiFetch<{ token: string }>("/auth/login", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: "shopper@cartpilot.ai", name: "Shopper Demo" })
           });
-          const data = await res.json();
-          if (data.token) {
-            localStorage.setItem("cartpilot_token", data.token);
+          if (res?.token) {
+            localStorage.setItem("cartpilot_token", res.token);
           }
         }
       } catch (err) {
@@ -42,7 +40,7 @@ export default function DashboardPage() {
 
     let isMounted = true;
     const token = typeof window !== "undefined" ? localStorage.getItem("cartpilot_token") : null;
-    const sseUrl = `http://localhost:5000/api/v1/shopping-sessions/${currentSession.id}/events?token=${token || ""}`;
+    const sseUrl = `${API_BASE}/shopping-sessions/${currentSession.id}/events?token=${token || ""}`;
     const eventSource = new EventSource(sseUrl);
 
     const updateSession = async () => {
