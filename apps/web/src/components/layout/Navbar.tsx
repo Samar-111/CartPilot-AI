@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  User
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
@@ -100,6 +101,14 @@ export function Navbar() {
                 {cartCount > 99 ? "99+" : cartCount}
               </span>
             )}
+          </Link>
+
+          <Link
+            href="/login"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-emerald-600 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors"
+          >
+            <User className="w-4 h-4 text-slate-500" />
+            <span className="hidden sm:inline">Account</span>
           </Link>
 
           <Link
