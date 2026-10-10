@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, Send, IndianRupee, Users, Calendar, Lightbulb, Compass } from "lucide-react";
+import { Sparkles, Send, IndianRupee, Users, Calendar, Lightbulb, Compass, MapPin } from "lucide-react";
+import { INDIAN_CITIES } from "@cartpilot/shared";
 
 interface ChatPanelProps {
   onSubmit: (data: {
@@ -10,6 +11,8 @@ interface ChatPanelProps {
     peopleCount: number;
     durationDays: number;
     preferences: string[];
+    pincode?: string;
+    cityName?: string;
   }) => void;
   isLoading: boolean;
 }
@@ -22,6 +25,7 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
   const [peopleCount, setPeopleCount] = useState(2);
   const [durationDays, setDurationDays] = useState(7);
   const [preferences, setPreferences] = useState<string[]>(["healthy", "vegetarian"]);
+  const [selectedPincode, setSelectedPincode] = useState("560001");
 
   const samplePrompts = [
     {
@@ -46,6 +50,8 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
     }
   };
 
+  const selectedCityObj = INDIAN_CITIES.find(c => c.pincode === selectedPincode) || INDIAN_CITIES[0];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!request.trim() || isLoading) return;
@@ -54,7 +60,9 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
       budgetPaise: budgetRupees * 100,
       peopleCount,
       durationDays,
-      preferences
+      preferences,
+      pincode: selectedPincode,
+      cityName: selectedCityObj.cityName
     });
   };
 
@@ -92,7 +100,27 @@ export function ChatPanel({ onSubmit, isLoading }: ChatPanelProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5">
+              <MapPin className="w-3.5 h-3.5 text-emerald-600" /> City / DarkStore
+            </label>
+            <select
+              value={selectedPincode}
+              onChange={(e) => setSelectedPincode(e.target.value)}
+              className="w-full text-xs font-semibold rounded-lg border border-slate-200 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer text-slate-800"
+            >
+              {INDIAN_CITIES.map((c) => (
+                <option key={c.pincode} value={c.pincode}>
+                  {c.cityName} ({c.pincode})
+                </option>
+              ))}
+            </select>
+            <span className="text-[10px] text-slate-400 mt-1 block truncate">
+              {selectedCityObj.storeName}
+            </span>
+          </div>
+
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
             <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5">
               <IndianRupee className="w-3.5 h-3.5 text-emerald-600" /> Budget Cap

@@ -90,16 +90,38 @@ export default function DashboardPage() {
     };
   }, [currentSession?.id]);
 
+  const ensureToken = async (): Promise<string> => {
+    let token = typeof window !== "undefined" ? localStorage.getItem("cartpilot_token") : null;
+    if (!token) {
+      try {
+        const res = await apiFetch<{ token: string }>("/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ email: "shopper@cartpilot.ai", name: "Shopper Demo" })
+        });
+        if (res?.token) {
+          localStorage.setItem("cartpilot_token", res.token);
+          return res.token;
+        }
+      } catch (err) {
+        console.error("Auth login err:", err);
+      }
+    }
+    return token || "";
+  };
+
   const handleLaunchWorkflow = async (data: {
     request: string;
     budgetPaise: number;
     peopleCount: number;
     durationDays: number;
     preferences: string[];
+    pincode?: string;
+    cityName?: string;
   }) => {
     setIsLoading(true);
     setEvents([]);
     try {
+      await ensureToken();
       const res = await apiFetch<{ sessionId: string }>("/shopping-sessions", {
         method: "POST",
         body: JSON.stringify(data)
@@ -164,7 +186,24 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-6 space-y-6">
           <ChatPanel onSubmit={handleLaunchWorkflow} isLoading={isLoading} />
-          {currentSession && (
+          {isLoading && (!currentSession || currentSession.proposedItems.length === 0) && (
+            <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-card space-y-4 animate-pulse">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center">
+                  <span className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-800 text-sm">Agents Assembling Proposal</h3>
+                  <p className="text-xs text-slate-400">Verifying live prices, stock levels, and nutritional match...</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 bg-slate-100 rounded-md w-3/4" />
+                <div className="h-4 bg-slate-100 rounded-md w-1/2" />
+              </div>
+            </div>
+          )}
+          {currentSession && currentSession.proposedItems && currentSession.proposedItems.length > 0 && (
             <ApprovalCard
               proposedItems={currentSession.proposedItems}
               totalPaise={currentSession.totalPaise}

@@ -10,6 +10,8 @@ export const ShoppingAgentState = Annotation.Root({
   preferences: Annotation<DietaryPreference[]>(),
   peopleCount: Annotation<number>(),
   durationDays: Annotation<number>(),
+  pincode: Annotation<string | undefined>(),
+  cityName: Annotation<string | undefined>(),
 
   plan: Annotation<ShoppingPlan | undefined>(),
   candidateProducts: Annotation<IProductDocument[]>({

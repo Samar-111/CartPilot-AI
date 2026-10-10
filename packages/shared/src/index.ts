@@ -181,6 +181,8 @@ export const ShoppingSessionSchema = z.object({
   retryCount: z.number().int().nonnegative().default(0),
   proposalVersion: z.number().int().positive().default(1),
   validationMessage: z.string().optional(),
+  pincode: z.string().optional(),
+  cityName: z.string().optional(),
   createdAt: z.string().or(z.date()),
   updatedAt: z.string().or(z.date())
 });
@@ -191,7 +193,9 @@ export const CreateShoppingSessionInputSchema = z.object({
   budgetPaise: z.number().int().positive().default(200000),
   preferences: z.array(DietaryPreferenceSchema).optional().default([]),
   durationDays: z.number().int().positive().default(7),
-  peopleCount: z.number().int().positive().default(2)
+  peopleCount: z.number().int().positive().default(2),
+  pincode: z.string().optional(),
+  cityName: z.string().optional()
 });
 export type CreateShoppingSessionInput = z.infer<typeof CreateShoppingSessionInputSchema>;
 

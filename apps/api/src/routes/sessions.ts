@@ -26,6 +26,8 @@ sessionsRouter.post("/", async (req: AuthenticatedRequest, res: Response) => {
       preferences: input.preferences || [],
       peopleCount: input.peopleCount,
       durationDays: input.durationDays,
+      pincode: input.pincode || "560001",
+      cityName: input.cityName || "Bengaluru",
       status: "initializing",
       proposedItems: [],
       totalPaise: 0,
@@ -47,6 +49,8 @@ sessionsRouter.post("/", async (req: AuthenticatedRequest, res: Response) => {
       preferences: input.preferences || [],
       peopleCount: input.peopleCount,
       durationDays: input.durationDays,
+      pincode: session.pincode,
+      cityName: session.cityName,
       retryCount: 0,
       messages: []
     }).catch(err => {
@@ -78,6 +82,8 @@ sessionsRouter.get("/:id", async (req: AuthenticatedRequest, res: Response) => {
       preferences: session.preferences,
       durationDays: session.durationDays,
       peopleCount: session.peopleCount,
+      pincode: (session as any).pincode || "560001",
+      cityName: (session as any).cityName || "Bengaluru",
       status: session.status,
       plan: session.plan,
       proposedItems: session.proposedItems,
@@ -216,6 +222,8 @@ sessionsRouter.post("/:id/revise", async (req: AuthenticatedRequest, res: Respon
       preferences: session.preferences,
       peopleCount: session.peopleCount,
       durationDays: session.durationDays,
+      pincode: session.pincode,
+      cityName: session.cityName,
       retryCount: 0,
       messages: []
     }).catch(err => {

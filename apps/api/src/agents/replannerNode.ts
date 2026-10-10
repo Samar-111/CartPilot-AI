@@ -14,6 +14,25 @@ export async function revisePlanNode(state: ShoppingAgentStateType): Promise<Par
 
   let currentItems: ProposedCartItem[] = [...state.proposedItems];
 
+  if (currentItems.length === 0 && state.candidateProducts?.length > 0) {
+    let runningSum = 0;
+    for (const prod of state.candidateProducts) {
+      if (runningSum + prod.pricePaise <= state.budgetPaise && prod.stock > 0) {
+        currentItems.push({
+          productId: (prod as any)._id.toString(),
+          name: prod.name,
+          category: prod.category,
+          unit: prod.unit,
+          unitPricePaise: prod.pricePaise,
+          quantity: 1,
+          subtotalPaise: prod.pricePaise,
+          reason: "Selected during replanning adjustment."
+        });
+        runningSum += prod.pricePaise;
+      }
+    }
+  }
+
   currentItems.sort((a, b) => b.subtotalPaise - a.subtotalPaise);
 
   let currentTotal = currentItems.reduce((acc, item) => acc + item.subtotalPaise, 0);
@@ -26,7 +45,7 @@ export async function revisePlanNode(state: ShoppingAgentStateType): Promise<Par
     }
   }
 
-  while (currentTotal > state.budgetPaise && currentItems.length > 2) {
+  while (currentTotal > state.budgetPaise && currentItems.length > 1) {
     currentItems.pop();
     currentTotal = currentItems.reduce((acc, item) => acc + item.subtotalPaise, 0);
   }

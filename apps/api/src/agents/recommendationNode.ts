@@ -96,7 +96,7 @@ Crucial constraints:
     candidateMap.set((c as any)._id.toString(), c);
   }
 
-  const proposedItems: ProposedCartItem[] = [];
+  let proposedItems: ProposedCartItem[] = [];
   for (const rec of recommendations) {
     const prod = candidateMap.get(rec.productId);
     if (prod && prod.isActive && prod.stock > 0) {
@@ -111,6 +111,25 @@ Crucial constraints:
         subtotalPaise: prod.pricePaise * qty,
         reason: rec.reason || "Recommended based on budget and preference match."
       });
+    }
+  }
+
+  if (proposedItems.length === 0 && candidates.length > 0) {
+    const fallbackRecs = fallback();
+    for (const rec of fallbackRecs) {
+      const prod = candidateMap.get(rec.productId);
+      if (prod && prod.isActive && prod.stock > 0) {
+        proposedItems.push({
+          productId: (prod as any)._id.toString(),
+          name: prod.name,
+          category: prod.category,
+          unit: prod.unit,
+          unitPricePaise: prod.pricePaise,
+          quantity: 1,
+          subtotalPaise: prod.pricePaise,
+          reason: rec.reason
+        });
+      }
     }
   }
 

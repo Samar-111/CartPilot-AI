@@ -15,6 +15,8 @@ export interface IShoppingSessionDocument extends Document {
   retryCount: number;
   proposalVersion: number;
   validationMessage?: string;
+  pincode?: string;
+  cityName?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +43,8 @@ const ShoppingSessionSchema = new Schema<IShoppingSessionDocument>(
     preferences: [{ type: String }],
     durationDays: { type: Number, default: 7 },
     peopleCount: { type: Number, default: 2 },
+    pincode: { type: String, default: "560001" },
+    cityName: { type: String, default: "Bengaluru" },
     status: {
       type: String,
       enum: ["initializing", "planning", "searching", "optimizing", "awaiting_approval", "approved", "rejected", "failed"],

@@ -12,20 +12,30 @@ export async function searchProductsNode(state: ShoppingAgentStateType): Promise
   const candidateProducts: IProductDocument[] = [];
 
   const isHealthy = state.preferences.includes("healthy") || state.userRequest.toLowerCase().includes("healthy");
+  const targetPincode = state.pincode || "560001";
 
   for (const cat of categoriesToSearch) {
-    const results = await searchProducts({
+    let results = await searchProducts({
       category: cat,
+      pincode: targetPincode,
       isHealthy: isHealthy ? true : undefined,
       limit: 10
     });
 
     if (results.length === 0) {
-      const fallbackResults = await searchProducts({ category: cat, limit: 10 });
-      candidateProducts.push(...fallbackResults);
-    } else {
-      candidateProducts.push(...results);
+      results = await searchProducts({ category: cat, pincode: targetPincode, limit: 10 });
     }
+
+    if (results.length === 0) {
+      results = await searchProducts({ category: cat, limit: 10 });
+    }
+
+    candidateProducts.push(...results);
+  }
+
+  if (candidateProducts.length === 0) {
+    const broadResults = await searchProducts({ limit: 40 });
+    candidateProducts.push(...broadResults);
   }
 
   const durationMs = Date.now() - startTime;
