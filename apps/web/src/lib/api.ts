@@ -9,13 +9,18 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers
+    });
+  } catch (netErr: any) {
+    throw new Error(`Cannot reach backend at ${API_BASE}. Make sure the backend server is running and accessible.`);
+  }
 
   if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({ error: "Request failed" }));
+    const errorBody = await res.json().catch(() => ({ error: `Server returned HTTP ${res.status}` }));
     throw new Error(errorBody.error || `HTTP ${res.status}`);
   }
 

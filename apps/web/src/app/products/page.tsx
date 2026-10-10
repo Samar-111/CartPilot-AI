@@ -52,17 +52,24 @@ export default function ProductsPage() {
     setSyncing(true);
     try {
       const activeStore = stores.find(s => s.pincode === selectedCity);
-      const syncPayload = products.map(p => {
-        const delta = Math.floor((Math.random() - 0.45) * 1000);
-        const newPrice = Math.max(1000, p.pricePaise + delta);
-        return {
-          name: p.name,
-          pricePaise: newPrice,
-          category: p.category,
-          unit: p.unit,
-          stock: p.stock
-        };
-      });
+      const syncPayload = products.length > 0
+        ? products.map(p => {
+            const delta = Math.floor((Math.random() - 0.45) * 1000);
+            const newPrice = Math.max(1000, p.pricePaise + delta);
+            return {
+              name: p.name,
+              pricePaise: newPrice,
+              category: p.category,
+              unit: p.unit,
+              stock: p.stock
+            };
+          })
+        : [
+            { name: "Organic Rolled Oats", pricePaise: 18000, category: "grains", unit: "1kg", stock: 50 },
+            { name: "Fresh Soya Paneer Tofu", pricePaise: 14000, category: "protein", unit: "400g", stock: 40 },
+            { name: "Greek Style Natural Yogurt", pricePaise: 22000, category: "dairy", unit: "800g", stock: 30 },
+            { name: "Farm Fresh Green Spinach", pricePaise: 6500, category: "vegetables", unit: "500g", stock: 60 }
+          ];
 
       await apiFetch("/products/sync", {
         method: "POST",
